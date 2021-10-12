@@ -19,15 +19,15 @@ This program creates a window drawing a emissionColor palette pixel by pixel
 
 On the top side it's just a linear RGB palette. On the bottom side it's a gamma adjusted sRGB palette
 
-![ColorsShowdown.png](ComputerGraphicsSamples/imgs/ColorsShowdown.png)
+![ColorsShowdown.png](./imgs/ColorsShowdown.png)
 
 ### Cornell Box
 
 This program creates a window drawing a Cornell box with ray tracing and simple spheres logic
-![img.png](ComputerGraphicsSamples/imgs/Cornell.png)
+![img.png](./imgs/Cornell.png)
 
 ### Raytracing v2 Bouncing light
 
 This is an extension of the previous program, this time each pixel bounces till it finds a light source. This render has
 4096 rays per pixel
-![img.png](ComputerGraphicsSamples/imgs/BouncingLight.png)
+![img.png](./imgs/BouncingLight.png)
