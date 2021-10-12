@@ -29,5 +29,5 @@ This program creates a window drawing a Cornell box with ray tracing and simple 
 ### Raytracing v2 Bouncing light
 
 This is an extension of the previous program, this time each pixel bounces till it finds a light source. This render has
-512 rays per pixel
-![img.png](ComputerGraphicsSamples/imgs/Cornell.png)
+4096 rays per pixel
+![img.png](ComputerGraphicsSamples/imgs/BouncingLight.png)

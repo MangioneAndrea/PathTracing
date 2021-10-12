@@ -5,13 +5,12 @@
 #include "Geometry/Ray/Ray.h"
 #include "Scene.h"
 #include <cmath>
-#define iterations 1
-#define fRand() ((double) rand() / (RAND_MAX / 2) - 1)
-#define p 0.4
 
-class Raytracing : public Scene {
+#define iterations 32
+
+class Textures : public Scene {
 public:
-    Raytracing() {
+    Textures() {
         width = 400;
         height = 400;
         objects = new std::vector<Sphere *>{
@@ -32,7 +31,7 @@ public:
                         1000,
                         0x0000ff,
                 },
-                new Sphere{new Vector3d{0, 1001, 0}, 1000, 0xffffff},
+                new Sphere{new Vector3d{0, 1001, 0}, 1000, 0xffffff, Color(0xffffff) * 10},
                 new Sphere{
                         new Vector3d{0, -1001, 0},
                         1000,
@@ -51,8 +50,8 @@ public:
         Vector3d r = up.crossProduct(camera->direction).normalize();
         Vector3d u = camera->direction->crossProduct(&r).normalize();
 
+        auto colors = (Color *) malloc(iterations * sizeof(Color));
         double fovScale = std::tan(fov / 2);
-        Ray *ray = new Ray(camera->origin, nullptr);
         for (auto i = 0; i < width * height; i++) {
             pixels[i] = 0;
             auto x = (double) (i % width);
@@ -67,10 +66,16 @@ public:
             if (i == 240050) {
                 i = i;
             }
-            pixels[i] = ComputeColor(eye, &d).ToInt();
+            pixels[i] = 0;
+            for (int it = 0; it <= iterations; it++) {
+                if (i % (width * 40) == 0) {
+                    it = it;
+                }
+                colors[it] = ComputeColor(eye, &d);
+            }
+            pixels[i] = Color::avg(iterations, colors).Clamp().GammaCorrect().ToInt();
         }
-        free(camera);
-        free(ray);
+        delete camera;
     }
 
     Vector3d *ClosestVectorFrom(Ray *ray, Sphere *&closestObj) {
@@ -101,15 +106,45 @@ public:
         return closest;
     }
 
+#define fRand() ((double) rand() / (RAND_MAX / 2) - 1)
+#define p 0.2
     Color ComputeColor(Vector3d *o, Vector3d *d) {
+        Vector3d *hp = nullptr;
+
         auto r = Ray(o, d);
+
         Sphere *closest = nullptr;
-        Vector3d *hp = ClosestVectorFrom(&r, closest);
-        delete hp;
+        hp = ClosestVectorFrom(&r, closest);
+
         if (closest == nullptr) {
+            delete hp;
             return BLACK;
         }
-        auto res = closest->color;
+
+        auto rnd = rand();
+        if ((rnd % 1000) <= p * 1000) {
+            delete hp;
+            return closest->emission;
+        }
+
+        Vector3d randomDir = Vector3d(0, 0, 0);
+        Vector3d n = closest->normalVectorAt(hp);
+        do {
+            randomDir.x = fRand();
+            randomDir.y = fRand();
+            randomDir.z = fRand();
+        } while (randomDir.squaredLength() > 1);
+        randomDir = randomDir.normalize();
+
+        if (randomDir.dot(&n) < 0) {
+            randomDir = randomDir.times(-1);
+        }
+
+        auto nextEmission = ComputeColor(hp, &randomDir);
+        delete hp;
+        auto ownColor = closest->BRDF * (n.dot(&randomDir) * (2 * PI) / (1 - p));
+        Color other = nextEmission * ownColor;
+        auto res = closest->emission + other;
         return res;
     }
 };

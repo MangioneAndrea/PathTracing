@@ -23,7 +23,7 @@ public:
   Vector3d normalVectorAt(Vector3d *vector);
 
   Sphere(Vector3d *center, double radius, uint32_t color);
-  Sphere(Vector3d *center, double radius, uint32_t color, uint32_t emission);
+  Sphere(Vector3d *center, double radius, uint32_t color, Color emission);
   Vector3d *ClosestIntersection(Ray *r);
 };
 

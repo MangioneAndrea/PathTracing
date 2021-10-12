@@ -6,16 +6,16 @@
 #include "Scene.h"
 #include <cmath>
 
-#define iterations 512
+#define iterations 4096
 
 class Raytracing2 : public Scene {
 public:
-    Raytracing2() {
-        width = 400;
-        height = 400;
+    Raytracing2(int width, int height) {
+        this->width = width;
+        this->height = height;
         objects = new std::vector<Sphere *>{
                 new Sphere{new Vector3d{-0.6, -0.7, -0.6}, 0.3, 0xDDDD00},
-                new Sphere{new Vector3d{0.3, -0.4, 0.3}, 0.6, 0x00DDDD},
+                new Sphere{new Vector3d{0.3, -0.4, 0.3}, 0.6, 0xffffff},
                 new Sphere{
                         new Vector3d{0, 0, 1001},
                         1000,
@@ -31,7 +31,7 @@ public:
                         1000,
                         0x0000ff,
                 },
-                new Sphere{new Vector3d{0, 1001, 0}, 1000, 0xffffff, 0xffffff},
+                new Sphere{new Vector3d{0, 1001, 0}, 1000, 0xffffff, Color(0xffffff) * 2},
                 new Sphere{
                         new Vector3d{0, -1001, 0},
                         1000,
@@ -68,12 +68,12 @@ public:
             }
             pixels[i] = 0;
             for (int it = 0; it <= iterations; it++) {
-                if (i % (width*40) == 0) {
+                if (i % (width * 40) == 0) {
                     it = it;
                 }
                 colors[it] = ComputeColor(eye, &d);
             }
-            pixels[i] = Color::avg(iterations, colors).ToInt();
+            pixels[i] = Color::avg(iterations, colors).Clamp().GammaCorrect().ToInt();
         }
         delete camera;
     }
@@ -109,12 +109,11 @@ public:
 #define fRand() ((double) rand() / (RAND_MAX / 2) - 1)
 #define p 0.2
     Color ComputeColor(Vector3d *o, Vector3d *d) {
-        Vector3d *hp = nullptr;
 
         auto r = Ray(o, d);
 
         Sphere *closest = nullptr;
-        hp = ClosestVectorFrom(&r, closest);
+        Vector3d *hp = ClosestVectorFrom(&r, closest);
 
         if (closest == nullptr) {
             delete hp;
@@ -133,7 +132,7 @@ public:
             randomDir.x = fRand();
             randomDir.y = fRand();
             randomDir.z = fRand();
-        } while (randomDir.length() > 1);
+        } while (randomDir.squaredLength() > 1);
         randomDir = randomDir.normalize();
 
         if (randomDir.dot(&n) < 0) {

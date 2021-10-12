@@ -10,61 +10,67 @@
 
 class Color {
 private:
-    static unsigned char sum(unsigned char a, unsigned char b) {
-        unsigned char tmp = a + b;
-        if (tmp < a || tmp < b)
-            return 255;
+    static uint32_t sum(uint32_t a, uint32_t b) {
+        uint32_t tmp = a + b;
         return tmp;
     }
-    static unsigned char multiply(unsigned char a, unsigned char b) {
-        unsigned long tmp = a * b;
-        if (tmp > 255)
-            return 255;
-        return (unsigned char) tmp;
+    static uint32_t multiply(uint32_t a, uint32_t b) {
+        unsigned long tmp = a * b / 255;
+        return (uint32_t) tmp;
     }
 
 public:
-    unsigned char r;
-    unsigned char g;
-    unsigned char b;
+    uint32_t r;
+    uint32_t g;
+    uint32_t b;
 
-    Color(uint32_t color) {
-        b = (unsigned char) color;
-        g = (unsigned char) (color >> 8);
-        r = (unsigned char) (color >> 16);
+    explicit Color(uint32_t color) {
+        b = color & 0x0000FF;
+        g = (color & 0x00FF00) >> 8;
+        r = (color & 0xFF0000) >> 16;
     }
 
-    Color(unsigned char r, unsigned char g, unsigned char b) : r(r), g(g), b(b) {}
+    [[maybe_unused]] Color(uint32_t r, uint32_t g, uint32_t b) : r(r), g(g), b(b) {}
 
-    uint32_t ToInt() const { return (r << 16) + (g << 8) + b; }
+    uint32_t ToInt() const {
+        Color c = Clamp();
+        return (c.r << 16) + (c.g << 8) + c.b;
+    }
+
+    Color Clamp() const {
+        return {
+                r > 255 ? 255 : r,
+                g > 255 ? 255 : g,
+                b > 255 ? 255 : b,
+        };
+    }
 
     Color operator*(Color other) const {
-
-        return {(unsigned char) (multiply(r, other.r)),
-                (unsigned char) (multiply(g, other.g)),
-                (unsigned char) (multiply(b, other.b))};
+        return {(uint32_t) (multiply(r, other.r)),
+                (uint32_t) (multiply(g, other.g)),
+                (uint32_t) (multiply(b, other.b))};
     };
 
     Color operator*(double m) const {
-        return {(unsigned char) (r * m), (unsigned char) (g * m),
-                (unsigned char) (b * m)};
+        return {(uint32_t) (r * m), (uint32_t) (g * m),
+                (uint32_t) (b * m)};
     };
 
     Color operator+(Color other) const {
         return {sum(r, other.r), sum(g, other.g), sum(b, other.b)};
     };
 
-    Color GammaCorrect() const {
+    [[maybe_unused]] Color GammaCorrect() const {
         return {
-                static_cast<unsigned char>(pow(((float) r) / 255, 1 / GAMMA) * 255),
-                static_cast<unsigned char>(pow(((float) g) / 255, 1 / GAMMA) * 255),
-                static_cast<unsigned char>(pow(((float) b) / 255, 1 / GAMMA) * 255),
+                static_cast<uint32_t>(pow(((float) r) / 255, 1 / GAMMA) * 255),
+                static_cast<uint32_t>(pow(((float) g) / 255, 1 / GAMMA) * 255),
+                static_cast<uint32_t>(pow(((float) b) / 255, 1 / GAMMA) * 255),
         };
     }
 
     Color avg(Color other) {
-        return {(unsigned char) (r / 2 + other.r / 2), (unsigned char) (g / 2 + other.g / 2),
-                (unsigned char) (b / 2 + other.b / 2)};
+        return {(uint32_t) (r / 2 + other.r / 2), (uint32_t) (g / 2 + other.g / 2),
+                (uint32_t) (b / 2 + other.b / 2)};
     }
     static Color avg(int count, Color *colors) {
         double r = 0;
@@ -76,10 +82,10 @@ public:
             g += (double) c.g;
             b += (double) c.b;
         }
-        return {(unsigned char) (r / count), (unsigned char) (g / count),
-                (unsigned char) (b / count)};
+        return {(uint32_t) (r / count), (uint32_t) (g / count),
+                (uint32_t) (b / count)};
     }
 };
-static Color BLACK(0xffffff);
-static Color WHITE(0x000000);
+[[maybe_unused]] static Color BLACK(0x000000);
+[[maybe_unused]] static Color WHITE(0xFFFFFF);
 #endif

@@ -11,19 +11,10 @@ Sphere::Sphere(Vector3d *center, double radius, uint32_t color)
       BRDF(this->color * (1. / M_PI)) {}
 
 Sphere::Sphere(Vector3d *center, double radius, uint32_t color,
-               uint32_t emission)
+               Color emission)
     : center(center), radius(radius), color(color),
       BRDF(this->color * (1. / M_PI)), emission(emission) {}
 
-bool Sphere::Intersects(Ray *r) {// geometric solution
-    // 1 * delta2 + 2CE*d * delta + |CE|2 -r2=0
-    // intersects= sqrt ( (2CE*d)2 - 4 * 1 * (|CE|-r2)2)
-    Vector3d CE = r->origin->minus(this->center);
-    double a = r->direction->dot(r->direction);
-    double b = 2 * CE.dot(r->direction);
-    double c = CE.dot(&CE) - radius * radius;
-    return (b * b - 4 * a * c) >= 0;
-}
 
 Vector3d *Sphere::ClosestIntersection(Ray *r) {// geometric solution
     // 1 * delta2 + 2CE*d * delta + |CE|2 -r2=0
