@@ -16,7 +16,7 @@ public:
         height = 400;
         objects = new std::vector<Sphere *>{
                 new Sphere{new Vector3d{-0.6, -0.7, -0.6}, 0.3, 0xDDDD00},
-                new Sphere{new Vector3d{0.3, -0.4, 0.3}, 0.6, 0x00DDDD},
+                new Sphere{new Vector3d{0.3, -0.4, 0.3}, 0.6, 0xDDDDDD},
                 new Sphere{
                         new Vector3d{0, 0, 1001},
                         1000,

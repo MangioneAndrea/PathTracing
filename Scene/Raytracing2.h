@@ -6,7 +6,7 @@
 #include "Scene.h"
 #include <cmath>
 
-#define iterations 4096
+#define iterations 128
 
 class Raytracing2 : public Scene {
 public:
@@ -14,8 +14,8 @@ public:
         this->width = width;
         this->height = height;
         objects = new std::vector<Sphere *>{
-                new Sphere{new Vector3d{-0.6, -0.7, -0.6}, 0.3, 0xDDDD00},
-                new Sphere{new Vector3d{0.3, -0.4, 0.3}, 0.6, 0xffffff},
+                new Sphere{new Vector3d{-0.6, -0.7, -0.6}, 0.3, 0xDDDD11},
+                new Sphere{new Vector3d{0.3, -0.4, 0.3}, 0.6, 0xDDDDDD},
                 new Sphere{
                         new Vector3d{0, 0, 1001},
                         1000,
@@ -24,14 +24,14 @@ public:
                 new Sphere{
                         new Vector3d{-1001, 0, 0},
                         1000,
-                        0xff0000,
+                        0xff1111,
                 },
                 new Sphere{
                         new Vector3d{1001, 0, 0},
                         1000,
-                        0x0000ff,
+                        0x1111dd,
                 },
-                new Sphere{new Vector3d{0, 1001, 0}, 1000, 0xffffff, Color(0xffffff) * 2},
+                new Sphere{new Vector3d{0, 1001, 0}, 1000, 0xffffff, Color(0xffffff)},
                 new Sphere{
                         new Vector3d{0, -1001, 0},
                         1000,
@@ -115,6 +115,7 @@ public:
         Sphere *closest = nullptr;
         Vector3d *hp = ClosestVectorFrom(&r, closest);
 
+
         if (closest == nullptr) {
             delete hp;
             return BLACK;
@@ -141,9 +142,12 @@ public:
 
         auto nextEmission = ComputeColor(hp, &randomDir);
         delete hp;
-        auto ownColor = closest->BRDF * (n.dot(&randomDir) * (2 * PI) / (1 - p));
+        auto ownColor = closest->BRDF * (n.dot(&randomDir) * ((2 * PI) / (1 - p)));
         Color other = nextEmission * ownColor;
         auto res = closest->emission + other;
+        if (res.r != 0) {
+            res = res;
+        }
         return res;
     }
 };

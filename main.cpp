@@ -3,8 +3,8 @@
 #include <Scene/ColorShowdown.h>
 #include <Scene/Raytracing.h>
 #include <Scene/Raytracing2.h>
+#include <Scene/Reflection.h>
 #include <Scene/Scene.h>
-#include <Scene/Textures.h>
 #include <thread>
 
 #define WIDTH 400
@@ -14,9 +14,9 @@
 #define COLOR_SHOWDOWN 1
 #define RAY_TRACING 2
 #define RAY_TRACING2 3
-#define TEXTURES 4
+#define REFLECTION 4
 
-#define ACTIVE 3
+#define ACTIVE 2
 
 class Screen {
 private:
@@ -38,8 +38,8 @@ public:
             case RAY_TRACING2:
                 scene = new Raytracing2(WIDTH, HEIGHT);
                 return;
-            case TEXTURES:
-                scene = new Textures();
+            case REFLECTION:
+                scene = new Reflection(WIDTH, HEIGHT);
                 return;
         }
     }

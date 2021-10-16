@@ -6,6 +6,12 @@
 #include <SDL2/SDL_main.h>
 #include <cmath>
 
+Sphere::Sphere(Vector3d *center, double radius, uint32_t color, double reflectivity)
+    : center(center), radius(radius), color(color), emission(0),
+      BRDF(this->color * (1. / M_PI)) {
+    this->reflectivity = reflectivity;
+}
+
 Sphere::Sphere(Vector3d *center, double radius, uint32_t color)
     : center(center), radius(radius), color(color), emission(0),
       BRDF(this->color * (1. / M_PI)) {}
@@ -35,12 +41,18 @@ Vector3d *Sphere::ClosestIntersection(Ray *r) {// geometric solution
     double delta =
             b > 0 ? (-b + std::sqrt(d)) / (2) : (-b - std::sqrt(d)) / (2);
 
-    auto best = std::min(delta / a, c / delta);
+    auto best = delta == 0 ? delta / a : a == 0 ? c / delta
+                                                : std::min(delta / a, c / delta);
 
     Vector3d res = r->direction->times(best).plus(r->origin);
+    auto re = new Vector3d(res);
 
-    return new Vector3d(res);
+    return re;
 }
 Vector3d Sphere::normalVectorAt(Vector3d *vector) {
-    return vector->minus(this->center).normalize();
+    auto res = vector->minus(this->center).normalize();
+    if (res.x == NAN) {
+        res = res;
+    }
+    return res;
 }

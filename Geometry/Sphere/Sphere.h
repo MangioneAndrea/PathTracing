@@ -12,19 +12,20 @@
 class Sphere {
 private:
 public:
-  Vector3d *center;
-  double radius;
-  Color color;
-  Color emission;
-  Color BRDF;
+    Vector3d *center;
+    double radius;
+    Color color;
+    Color emission;
+    double reflectivity = 0;
+    Color BRDF;
 
-  bool Intersects(Ray *r);
 
-  Vector3d normalVectorAt(Vector3d *vector);
+    Vector3d normalVectorAt(Vector3d *vector);
 
-  Sphere(Vector3d *center, double radius, uint32_t color);
-  Sphere(Vector3d *center, double radius, uint32_t color, Color emission);
-  Vector3d *ClosestIntersection(Ray *r);
+    Sphere(Vector3d *center, double radius, uint32_t color);
+    Sphere(Vector3d *center, double radius, uint32_t color, double reflectivity);
+    Sphere(Vector3d *center, double radius, uint32_t color, Color emission);
+    Vector3d *ClosestIntersection(Ray *r);
 };
 
-#endif // PATHTRACING_SPHERE_H
+#endif// PATHTRACING_SPHERE_H

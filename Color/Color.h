@@ -10,50 +10,49 @@
 
 class Color {
 private:
-    static uint32_t sum(uint32_t a, uint32_t b) {
-        uint32_t tmp = a + b;
+    static double sum(double a, double b) {
+        double tmp = a + b;
         return tmp;
     }
-    static uint32_t multiply(uint32_t a, uint32_t b) {
-        unsigned long tmp = a * b / 255;
-        return (uint32_t) tmp;
+    static double multiply(double a, double b) {
+        return (double) a * b;
     }
 
 public:
-    uint32_t r;
-    uint32_t g;
-    uint32_t b;
+    double r;
+    double g;
+    double b;
 
     explicit Color(uint32_t color) {
-        b = color & 0x0000FF;
-        g = (color & 0x00FF00) >> 8;
-        r = (color & 0xFF0000) >> 16;
+        b = (double) (color & 0x0000FF) / 255;
+        g = (double) ((color & 0x00FF00) >> 8) / 255;
+        r = (double) ((color & 0xFF0000) >> 16) / 255;
     }
 
-    [[maybe_unused]] Color(uint32_t r, uint32_t g, uint32_t b) : r(r), g(g), b(b) {}
+    [[maybe_unused]] Color(double r, double g, double b) : r(r), g(g), b(b) {}
 
     uint32_t ToInt() const {
         Color c = Clamp();
-        return (c.r << 16) + (c.g << 8) + c.b;
+        return (((uint32_t) (c.r * 255)) << 16) + (static_cast<uint32_t>(c.g * 255) << 8) + c.b * 255;
     }
 
     Color Clamp() const {
         return {
-                r > 255 ? 255 : r,
-                g > 255 ? 255 : g,
-                b > 255 ? 255 : b,
+                r > 1 ? 1 : r,
+                g > 1 ? 1 : g,
+                b > 1 ? 1 : b,
         };
     }
 
     Color operator*(Color other) const {
-        return {(uint32_t) (multiply(r, other.r)),
-                (uint32_t) (multiply(g, other.g)),
-                (uint32_t) (multiply(b, other.b))};
+        return {(double) (multiply(r, other.r)),
+                (double) (multiply(g, other.g)),
+                (double) (multiply(b, other.b))};
     };
 
     Color operator*(double m) const {
-        return {(uint32_t) (r * m), (uint32_t) (g * m),
-                (uint32_t) (b * m)};
+        return {(double) (r * m), (double) (g * m),
+                (double) (b * m)};
     };
 
     Color operator+(Color other) const {
@@ -62,15 +61,15 @@ public:
 
     [[maybe_unused]] Color GammaCorrect() const {
         return {
-                static_cast<uint32_t>(pow(((float) r) / 255, 1 / GAMMA) * 255),
-                static_cast<uint32_t>(pow(((float) g) / 255, 1 / GAMMA) * 255),
-                static_cast<uint32_t>(pow(((float) b) / 255, 1 / GAMMA) * 255),
+                static_cast<double>(pow((r), 1 / GAMMA)),
+                static_cast<double>(pow((g), 1 / GAMMA)),
+                static_cast<double>(pow((b), 1 / GAMMA)),
         };
     }
 
     Color avg(Color other) {
-        return {(uint32_t) (r / 2 + other.r / 2), (uint32_t) (g / 2 + other.g / 2),
-                (uint32_t) (b / 2 + other.b / 2)};
+        return {(double) (r / 2 + other.r / 2), (double) (g / 2 + other.g / 2),
+                (double) (b / 2 + other.b / 2)};
     }
     static Color avg(int count, Color *colors) {
         double r = 0;
@@ -78,14 +77,13 @@ public:
         double b = 0;
         for (int i = 0; i < count; i++) {
             Color c = colors[i];
-            r += (double) c.r;
-            g += (double) c.g;
-            b += (double) c.b;
+            r += c.r;
+            g += c.g;
+            b += c.b;
         }
-        return {(uint32_t) (r / count), (uint32_t) (g / count),
-                (uint32_t) (b / count)};
+        return {r / count, g / count, b / count};
     }
 };
-[[maybe_unused]] static Color BLACK(0x000000);
-[[maybe_unused]] static Color WHITE(0xFFFFFF);
+#define BLACK Color(0x000000);
+#define WHITE Color(0xFFFFFF);
 #endif
