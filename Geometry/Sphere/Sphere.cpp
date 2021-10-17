@@ -41,18 +41,15 @@ Vector3d *Sphere::ClosestIntersection(Ray *r) {// geometric solution
     double delta =
             b > 0 ? (-b + std::sqrt(d)) / (2) : (-b - std::sqrt(d)) / (2);
 
+    if (delta < 0.000001)
+        return nullptr;
+
     auto best = delta == 0 ? delta / a : a == 0 ? c / delta
                                                 : std::min(delta / a, c / delta);
 
     Vector3d res = r->direction->times(best).plus(r->origin);
-    auto re = new Vector3d(res);
-
-    return re;
+    return new Vector3d(res.x, res.y, res.z);
 }
 Vector3d Sphere::normalVectorAt(Vector3d *vector) {
-    auto res = vector->minus(this->center).normalize();
-    if (res.x == NAN) {
-        res = res;
-    }
-    return res;
+    return vector->minus(this->center).normalize();
 }

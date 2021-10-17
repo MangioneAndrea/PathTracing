@@ -4,6 +4,7 @@
 #include <Scene/Raytracing.h>
 #include <Scene/Raytracing2.h>
 #include <Scene/Reflection.h>
+#include <Scene/Texture.h>
 #include <Scene/Scene.h>
 #include <thread>
 
@@ -15,8 +16,9 @@
 #define RAY_TRACING 2
 #define RAY_TRACING2 3
 #define REFLECTION 4
+#define TEXTURE 5
 
-#define ACTIVE 2
+#define ACTIVE 3
 
 class Screen {
 private:
@@ -40,6 +42,9 @@ public:
                 return;
             case REFLECTION:
                 scene = new Reflection(WIDTH, HEIGHT);
+                return;
+            case TEXTURE:
+                scene = new Texture(WIDTH, HEIGHT);
                 return;
         }
     }
@@ -107,6 +112,7 @@ public:
     void tick() { scene->GetPixels(); }
 
     void draw() {
+        if (scene->pixels == nullptr) return;
         SDL_RenderClear(renderer);
         SDL_UpdateTexture(texture, nullptr, scene->pixels, WIDTH * sizeof(int));
         SDL_RenderCopy(renderer, texture, nullptr, nullptr);

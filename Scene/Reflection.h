@@ -6,16 +6,18 @@
 #include "Scene.h"
 #include <cmath>
 
-#define iterations 32
+#define iterations 4
 
 class Reflection : public Scene {
 public:
+    Color colors[iterations];
+
     Reflection(int width, int height) {
         this->width = width;
         this->height = height;
         objects = new std::vector<Sphere *>{
-                new Sphere{new Vector3d{-0.6, -0.7, -0.6}, 0.3, 0xDDDD00, 0.1},
-                new Sphere{new Vector3d{0.3, -0.4, 0.3}, 0.6, 0xffffff, 0.1},
+                new Sphere{new Vector3d{-0.6, -0.7, -0.6}, 0.3, 0xDDDD11, 1},
+                new Sphere{new Vector3d{0.3, -0.4, 0.3}, 0.6, 0xDDDDDD, 1},
                 new Sphere{
                         new Vector3d{0, 0, 1001},
                         1000,
@@ -24,14 +26,14 @@ public:
                 new Sphere{
                         new Vector3d{-1001, 0, 0},
                         1000,
-                        0xff0000,
+                        0xff1111,
                 },
                 new Sphere{
                         new Vector3d{1001, 0, 0},
                         1000,
-                        0x0000ff,
+                        0x1111dd,
                 },
-                new Sphere{new Vector3d{0, 1001, 0}, 1000, 0xffffff, Color(0xffffff) * 2},
+                new Sphere{new Vector3d{0, 1001, 0}, 1000, 0xffffff, Color(0xffffff)},
                 new Sphere{
                         new Vector3d{0, -1001, 0},
                         1000,
@@ -45,12 +47,10 @@ public:
 
 
     void GetPixels() override {
-        Ray *camera = new Ray(eye, lookAt);
         Vector3d up = Vector3d(0, 1, 0);
-        Vector3d r = up.crossProduct(camera->direction).normalize();
-        Vector3d u = camera->direction->crossProduct(&r).normalize();
+        Vector3d r = up.crossProduct(lookAt).normalize();
+        Vector3d u = lookAt->crossProduct(&r).normalize();
 
-        auto colors = (Color *) malloc(iterations * sizeof(Color));
         double fovScale = std::tan(fov / 2);
         for (auto i = 0; i < width * height; i++) {
             pixels[i] = 0;
@@ -62,8 +62,9 @@ public:
 
             auto tmp = r.times(fovScale * x);
             auto tmp2 = u.times(-fovScale * y);
-            Vector3d d = camera->direction->normalize().plus(&tmp).plus(&tmp2);
-            if (i == 240050) {
+            Vector3d d = lookAt->normalize().plus(&tmp).plus(&tmp2);
+
+            if (i == 96300) {
                 i = i;
             }
             pixels[i] = 0;
@@ -75,7 +76,6 @@ public:
             }
             pixels[i] = Color::avg(iterations, colors).Clamp().GammaCorrect().ToInt();
         }
-        delete camera;
     }
 
     Vector3d *ClosestVectorFrom(Ray *ray, Sphere *&closestObj) {
@@ -109,23 +109,18 @@ public:
 #define fRand() ((double) rand() / (RAND_MAX / 2) - 1)
 #define p 0.2
     Color ComputeColor(Vector3d *o, Vector3d *d) {
-        Vector3d *hp = nullptr;
 
         auto r = Ray(o, d);
 
         Sphere *closest = nullptr;
-        hp = ClosestVectorFrom(&r, closest);
+        Vector3d *hp = ClosestVectorFrom(&r, closest);
+
 
         if (closest == nullptr) {
             delete hp;
             return BLACK;
         }
 
-        auto rnd = rand();
-        if ((rnd % 1000) <= p * 1000) {
-            delete hp;
-            return closest->emission;
-        }
 
         Vector3d randomDir = Vector3d(0, 0, 0);
         Vector3d n = closest->normalVectorAt(hp);
@@ -139,22 +134,19 @@ public:
         if (randomDir.dot(&n) < 0) {
             randomDir = randomDir.times(-1);
         }
-
-        Vector3d *nextDirection = &randomDir;
-
-
-        Color nextEmission = ComputeColor(hp, nextDirection);
-
-        Color reflectiveBRDF=closest->BRDF;
-
-        if ((rand() % 1000) < closest->reflectivity * 1000) {
-            reflectiveBRDF=nextEmission;
+        if ((rand() % 1000) <= closest->reflectivity * 1000) {
+            delete hp;
+            return BLACK;
         }
-        delete hp;
+        auto nextEmission = ComputeColor(hp, &randomDir);
 
-        auto ownColor = closest->BRDF * (n.dot(nextDirection) * (2 * PI) / (1 - p));
-        Color other = nextEmission * ownColor;
-        auto res = closest->emission + other;
+        if ((rand() % 1000) <= p * 1000) {
+            delete hp;
+            return closest->emission + nextEmission;
+        }
+        Color ownColor = closest->BRDF * (n.dot(&randomDir) / (1 / (2 * PI)));
+        Color res = closest->emission + nextEmission * ownColor;
+        delete hp;
         return res;
     }
 };

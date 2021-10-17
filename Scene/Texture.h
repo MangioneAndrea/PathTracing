@@ -4,26 +4,22 @@
 
 #include "Geometry/Ray/Ray.h"
 #include "Scene.h"
-#include <chrono>
 #include <cmath>
 
-#define iterations 32
+#define iterations 4
 
-class Raytracing2 : public Scene {
+class Texture : public Scene {
 public:
     Color colors[iterations];
-    Raytracing2(int width, int height) {
-        srand((unsigned int) time(NULL));
+    Texture(int width, int height) {
         this->width = width;
         this->height = height;
         objects = new std::vector<Sphere *>{
-                new Sphere{new Vector3d{-0.6, -0.7, -2.6}, 0.3, 0xDDDD11},
-                new Sphere{new Vector3d{0.3, -0.4, -2.3}, 0.6, 0xDDDDDD},
-                new Sphere{new Vector3d{0, -0.9, 0}, 0.4, 0xFFFFFF,Color(0xffffff)},
+                new Sphere{new Vector3d{-0, -0, -0}, 0.5, 0xDDDD11},
                 new Sphere{
                         new Vector3d{0, 0, 1001},
                         1000,
-                        0x11ff11,
+                        0x888888,
                 },
                 new Sphere{
                         new Vector3d{-1001, 0, 0},
@@ -35,7 +31,7 @@ public:
                         1000,
                         0x1111dd,
                 },
-                new Sphere{new Vector3d{0, 1001, 0}, 1000, 0xffffff, Color(0xffffff) },
+                new Sphere{new Vector3d{0, 1001, 0}, 1000, 0xffffff, Color(0xffffff)},
                 new Sphere{
                         new Vector3d{0, -1001, 0},
                         1000,
@@ -66,16 +62,17 @@ public:
             auto tmp2 = u.times(-fovScale * y);
             Vector3d d = lookAt->normalize().plus(&tmp).plus(&tmp2);
 
-            pixels[i] = 0;
-            if (true || i >= 150000 && i <= 150050) {
-                for (int it = 0; it <= iterations; it++) {
-                    if (i % (width * 40) == 0) {
-                        it = it;
-                    }
-                    colors[it] = ComputeColor(eye, &d);
-                }
-                pixels[i] = Color::avg(iterations, colors).Clamp().GammaCorrect().ToInt();
+            if (i == 96300) {
+                i = i;
             }
+            pixels[i] = 0;
+            for (int it = 0; it <= iterations; it++) {
+                if (i % (width * 40) == 0) {
+                    it = it;
+                }
+                colors[it] = ComputeColor(eye, &d);
+            }
+            pixels[i] = Color::avg(iterations, colors).Clamp().GammaCorrect().ToInt();
         }
     }
 
@@ -107,8 +104,8 @@ public:
         return closest;
     }
 
-#define fRand() (((double) ((int) rand())) / (RAND_MAX / 2) - 1)
-#define p 0.1
+#define fRand() ((double) rand() / (RAND_MAX / 2) - 1)
+#define p 0.2
     Color ComputeColor(Vector3d *o, Vector3d *d) {
 
         auto r = Ray(o, d);
@@ -137,16 +134,12 @@ public:
         } while (randomDir.squaredLength() > 1);
         randomDir = randomDir.normalize();
 
-
         if (randomDir.dot(&n) < 0) {
             randomDir = randomDir.times(-1);
         }
+        auto nextEmission = ComputeColor(hp, &randomDir);
 
-        auto randomDirSpot = randomDir.plus(hp);
-
-        auto nextEmission = ComputeColor(hp, &randomDirSpot);
-
-        Color ownColor = closest->BRDF * (n.dot(&randomDir) * ((2 * PI) / (1 - p)));
+        Color ownColor = closest->BRDF * (n.dot(&randomDir) / (1 / (2 * PI)));
         Color res = closest->emission + nextEmission * ownColor;
         delete hp;
         return res;

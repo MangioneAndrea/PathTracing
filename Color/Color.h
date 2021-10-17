@@ -23,6 +23,12 @@ public:
     double g;
     double b;
 
+    Color() {
+        r = 0;
+        g = 0;
+        b = 0;
+    }
+
     explicit Color(uint32_t color) {
         b = (double) (color & 0x0000FF) / 255;
         g = (double) ((color & 0x00FF00) >> 8) / 255;
@@ -59,7 +65,7 @@ public:
         return {sum(r, other.r), sum(g, other.g), sum(b, other.b)};
     };
 
-    [[maybe_unused]] Color GammaCorrect() const {
+    Color GammaCorrect() const {
         return {
                 static_cast<double>(pow((r), 1 / GAMMA)),
                 static_cast<double>(pow((g), 1 / GAMMA)),
@@ -84,6 +90,8 @@ public:
         return {r / count, g / count, b / count};
     }
 };
+#ifndef BLACK
 #define BLACK Color(0x000000);
 #define WHITE Color(0xFFFFFF);
+#endif
 #endif
