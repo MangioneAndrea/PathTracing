@@ -35,7 +35,7 @@ public:
                 scene = new ColorShowdown();
                 return;
             case RAY_TRACING:
-                scene = new Raytracing();
+                scene = new Raytracing(WIDTH, HEIGHT);
                 return;
             case RAY_TRACING2:
                 scene = new Raytracing2(WIDTH, HEIGHT);

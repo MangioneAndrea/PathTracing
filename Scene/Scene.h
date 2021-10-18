@@ -15,8 +15,8 @@
 
 class Scene {
 public:
-    Vector3d *eye;
-    Vector3d *lookAt;
+    glm::dvec3  eye;
+    glm::dvec3  lookAt;
     double fov = 0.628319;// 36 deg
     uint32_t *pixels;
 

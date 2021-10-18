@@ -5,51 +5,51 @@
 #include "Sphere.h"
 #include <SDL2/SDL_main.h>
 #include <cmath>
+#include <glm/ext.hpp>
 
-Sphere::Sphere(Vector3d *center, double radius, uint32_t color, double reflectivity)
+Sphere::Sphere(glm::dvec3 center, double radius, uint32_t color, double reflectivity)
     : center(center), radius(radius), color(color), emission(0),
       BRDF(this->color * (1. / M_PI)) {
     this->reflectivity = reflectivity;
 }
 
-Sphere::Sphere(Vector3d *center, double radius, uint32_t color)
+Sphere::Sphere(glm::dvec3 center, double radius, uint32_t color)
     : center(center), radius(radius), color(color), emission(0),
       BRDF(this->color * (1. / M_PI)) {}
 
-Sphere::Sphere(Vector3d *center, double radius, uint32_t color,
+Sphere::Sphere(glm::dvec3 center, double radius, uint32_t color,
                Color emission)
     : center(center), radius(radius), color(color),
       BRDF(this->color * (1. / M_PI)), emission(emission) {}
 
 
-Vector3d *Sphere::ClosestIntersection(Ray *r) {// geometric solution
+glm::dvec3 *Sphere::ClosestIntersection(glm::dvec3 origin, glm::dvec3 direction) {// geometric solution
     // 1 * delta2 + 2CE*d * delta + |CE|2 -r2=0
     // intersects= sqrt ( (2CE*d)2 - 4 * 1 * (|CE|-r2)2)
-    if (r->origin == this->center)
+
+
+    auto u = glm::normalize(direction);
+    glm::dvec3 CE = origin - (this->center);
+
+    auto a = 1;
+    auto b = 2 * glm::dot(u, CE);
+    auto c = glm::dot(CE, CE) - radius * radius;
+
+    double delta = (b * b - 4 * a * c);
+
+    if (delta < 0.0001)
         return nullptr;
 
-    Vector3d CE = r->origin->minus(this->center);
-    double a = r->direction->dot(r->direction);
-    double b = 2 * CE.dot(r->direction);
-    double c = CE.dot(&CE) - radius * radius;
+    double d = b > 0 ? (-b + std::sqrt(delta)) : (-b - std::sqrt(delta));
 
-    double d = (b * b - 4 * a * c);
 
-    if (d < 0)
+    if (d < 0.000001)
         return nullptr;
 
-    double delta =
-            b > 0 ? (-b + std::sqrt(d)) / (2) : (-b - std::sqrt(d)) / (2);
-
-    if (delta < 0.000001)
-        return nullptr;
-
-    auto best = delta == 0 ? delta / a : a == 0 ? c / delta
-                                                : std::min(delta / a, c / delta);
-
-    Vector3d res = r->direction->times(best).plus(r->origin);
-    return new Vector3d(res.x, res.y, res.z);
+    auto best = d / (2 * a);
+    glm::dvec3 res = u * glm::dvec1(best) + (origin);
+    return new glm::dvec3{res.x, res.y, res.z};
 }
-Vector3d Sphere::normalVectorAt(Vector3d *vector) {
-    return vector->minus(this->center).normalize();
+glm::dvec3 Sphere::normalVectorAt(glm::dvec3 vector) {
+    return glm::normalize(vector - this->center);
 }

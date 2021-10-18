@@ -4,6 +4,7 @@
 
 #include "Geometry/Ray/Ray.h"
 #include "Scene.h"
+#include "glm/ext.hpp"
 #include <cmath>
 #define iterations 1
 #define fRand() ((double) rand() / (RAND_MAX / 2) - 1)
@@ -11,80 +12,79 @@
 
 class Raytracing : public Scene {
 public:
-    Raytracing() {
-        width = 400;
-        height = 400;
+    Raytracing(int width, int height) {
+        srand((unsigned int) time(NULL));
+        this->width = width;
+        this->height = height;
         objects = new std::vector<Sphere *>{
-                new Sphere{new Vector3d{-0.6, -0.7, -0.6}, 0.3, 0xDDDD00},
-                new Sphere{new Vector3d{0.3, -0.4, 0.3}, 0.6, 0xDDDDDD},
+                new Sphere{glm::vec3{-0.6, -0.7, -0.6}, 0.3, 0xDDDD11},
+                new Sphere{glm::vec3{0.3, -0.4, 0.3}, 0.6, 0xDDDDDD},
                 new Sphere{
-                        new Vector3d{0, 0, 1001},
-                        1000,
-                        0x888888,
+                        glm::vec3{0, 0, 101},
+                        100,
+                        0x11ff11,
                 },
                 new Sphere{
-                        new Vector3d{-1001, 0, 0},
-                        1000,
-                        0xff0000,
+                        glm::vec3{-101, 0, 0},
+                        100,
+                        0xff1111,
                 },
                 new Sphere{
-                        new Vector3d{1001, 0, 0},
-                        1000,
-                        0x0000ff,
+                        glm::vec3{101, 0, 0},
+                        100,
+                        0x1111dd,
                 },
-                new Sphere{new Vector3d{0, 1001, 0}, 1000, 0xffffff},
+                new Sphere{glm::vec3{0, 101, 0}, 100, 0xffffff, Color(0xffffff)},
                 new Sphere{
-                        new Vector3d{0, -1001, 0},
-                        1000,
-                        0x888888,
+                        glm::vec3{0, -101, 0},
+                        100,
+                        0x888811,
                 }};
         pixels = (uint32_t *) malloc(sizeof(uint32_t) * width * height);
         aspectRatio = (double) width / (double) height;
-        eye = new Vector3d(0, 0, -14);
-        lookAt = new Vector3d(0, 0, 6);
+        eye = glm::dvec3(0, 0, -14);
+        lookAt = glm::dvec3(0, 0, 6);
     }
 
 
     void GetPixels() override {
-        Ray *camera = new Ray(eye, lookAt);
-        Vector3d up = Vector3d(0, 1, 0);
-        Vector3d r = up.crossProduct(camera->direction).normalize();
-        Vector3d u = camera->direction->crossProduct(&r).normalize();
+        glm::dvec3 up = glm::vec3(0, 1, 0);
+
+        auto r = glm::normalize(glm::cross(up, lookAt));
+        auto u = glm::normalize(glm::cross(lookAt, r));
 
         double fovScale = std::tan(fov / 2);
-        Ray *ray = new Ray(camera->origin, nullptr);
         for (auto i = 0; i < width * height; i++) {
             pixels[i] = 0;
-            auto x = (double) (i % width);
-            auto y = (double) std::floor(i / width);
+            auto x = (float) (i % width);
+            auto y = (float) std::floor(i / width);
             // x,y from -1 to 1
-            x = (x / ((double) width / 2) - 1) * fovScale * aspectRatio;
-            y = (y / ((double) height / 2) - 1) * fovScale;
+            x = (x / ((float) width / 2) - 1) * fovScale * aspectRatio;
+            y = (y / ((float) height / 2) - 1) * fovScale;
+            auto tmp = r * glm::dvec1(fovScale * x);
+            auto tmp2 = u * (-fovScale * y);
+            glm::dvec3 d = glm::normalize(lookAt) + tmp + tmp2;//  lookAt.no.plus(&tmp).plus(&tmp2);
 
-            auto tmp = r.times(fovScale * x);
-            auto tmp2 = u.times(-fovScale * y);
-            Vector3d d = camera->direction->normalize().plus(&tmp).plus(&tmp2);
             if (i == 240050) {
                 i = i;
             }
-            pixels[i] = ComputeColor(eye, &d).ToInt();
+            pixels[i] = ComputeColor(eye, d).ToInt();
         }
-        free(camera);
-        free(ray);
     }
 
-    Vector3d *ClosestVectorFrom(Ray *ray, Sphere *&closestObj) {
-        Vector3d *closest = nullptr;
+
+    glm::dvec3 *ClosestVectorFrom(glm::dvec3 o, glm::dvec3 d, Sphere *&closestObj) {
+        glm::dvec3 *closest = nullptr;
         for (auto &elem : *objects) {
-            Vector3d *intersection = elem->ClosestIntersection(ray);
+            glm::dvec3 *intersection = elem->ClosestIntersection(o, d);
             if (intersection != nullptr) {
-                double d1 = ray->origin->distanceTo(intersection);
+                double d1 = glm::distance(o, *intersection);
                 if (d1 == 0) {
                     delete intersection;
                     continue;
                 }
                 if (closest != nullptr) {
-                    double d2 = ray->origin->distanceTo(closest);
+                    double d2 = glm::distance(o, *closest);
                     if (d1 < d2) {
                         delete closest;
                         closest = intersection;
@@ -101,15 +101,17 @@ public:
         return closest;
     }
 
-    Color ComputeColor(Vector3d *o, Vector3d *d) {
-        auto r = Ray(o, d);
+
+    Color ComputeColor(glm::dvec3 origin, glm::dvec3 direction) {
+
+        // auto r = Ray(origin, direction);
+
         Sphere *closest = nullptr;
-        Vector3d *hp = ClosestVectorFrom(&r, closest);
-        delete hp;
+        glm::dvec3 *hp_ = ClosestVectorFrom(origin, direction, closest);
+
         if (closest == nullptr) {
             return BLACK;
         }
-        auto res = closest->color;
-        return res;
+        return closest->color;
     }
 };

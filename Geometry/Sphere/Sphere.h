@@ -2,7 +2,7 @@
 // Created by Andrea Mangione on 27/09/2021.
 //
 #include "../Ray/Ray.h"
-#include "Geometry/Vector3d/Vector3d.h"
+#include "glm/vec3.hpp"
 #include <Color/Color.h>
 #include <cstdint>
 
@@ -12,7 +12,7 @@
 class Sphere {
 private:
 public:
-    Vector3d *center;
+    glm::dvec3 center;
     double radius;
     Color color;
     Color emission;
@@ -20,12 +20,12 @@ public:
     Color BRDF;
 
 
-    Vector3d normalVectorAt(Vector3d *vector);
+    glm::dvec3 normalVectorAt(glm::dvec3 vector);
 
-    Sphere(Vector3d *center, double radius, uint32_t color);
-    Sphere(Vector3d *center, double radius, uint32_t color, double reflectivity);
-    Sphere(Vector3d *center, double radius, uint32_t color, Color emission);
-    Vector3d *ClosestIntersection(Ray *r);
+    Sphere(glm::dvec3 center, double radius, uint32_t color);
+    Sphere(glm::dvec3 center, double radius, uint32_t color, double reflectivity);
+    Sphere(glm::dvec3 center, double radius, uint32_t color, Color emission);
+    glm::dvec3 *ClosestIntersection(glm::dvec3 origin, glm::dvec3 direction);
 };
 
 #endif// PATHTRACING_SPHERE_H
