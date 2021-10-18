@@ -2,13 +2,12 @@
 // Created by  Andrea Mangione  on 27/09/2021.
 //
 
-#include "Geometry/Ray/Ray.h"
 #include "Scene.h"
 #include "glm/ext.hpp"
 #include <chrono>
 #include <cmath>
 
-#define iterations 8
+#define iterations 128
 
 class Raytracing2 : public Scene {
 public:
@@ -115,12 +114,14 @@ public:
         glm::dvec3 *hp_ = ClosestVectorFrom(origin, direction, closest);
 
         if (closest == nullptr) {
+            delete hp_;
             return BLACK;
         }
         glm::dvec3 hp = *hp_;
 
         auto rnd = rand();
         if ((rnd % 1000) <= p * 1000) {
+            delete hp_;
             return closest->emission;
         }
 
@@ -145,6 +146,7 @@ public:
 
         Color ownColor = closest->BRDF * (glm::dot(n, randomDir) * ((2 * PI) / (1 - p)));
         Color res = closest->emission + nextEmission * ownColor;
+        delete hp_;
         return res;
     }
 };

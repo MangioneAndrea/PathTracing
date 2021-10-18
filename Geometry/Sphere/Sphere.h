@@ -1,7 +1,6 @@
 //
 // Created by Andrea Mangione on 27/09/2021.
 //
-#include "../Ray/Ray.h"
 #include "glm/vec3.hpp"
 #include <Color/Color.h>
 #include <cstdint>

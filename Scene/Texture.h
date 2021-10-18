@@ -2,7 +2,6 @@
 // Created by  Andrea Mangione  on 27/09/2021.
 //
 
-#include "Geometry/Ray/Ray.h"
 #include "Scene.h"
 #include <cmath>
 
@@ -48,7 +47,6 @@ public:
 
     void GetPixels() override {
         glm::dvec3 up = glm::vec3(0, 1, 0);
-        ;
 
         auto r = glm::normalize(glm::cross(up, lookAt));
         auto u = glm::normalize(glm::cross(lookAt, r));
@@ -66,15 +64,13 @@ public:
             glm::dvec3 d = glm::normalize(lookAt) + tmp + tmp2;//  lookAt.no.plus(&tmp).plus(&tmp2);
 
             pixels[i] = 0;
-            if (true || i >= 150000 && i <= 150050) {
-                for (int it = 0; it <= iterations; it++) {
-                    if (i % (width * 40) == 0) {
-                        it = it;
-                    }
-                    colors[it] = ComputeColor(eye, d);
+            for (int it = 0; it <= iterations; it++) {
+                if (i % (width * 40) == 0) {
+                    it = it;
                 }
-                pixels[i] = Color::avg(iterations, colors).Clamp().GammaCorrect().ToInt();
+                colors[it] = ComputeColor(eye, d);
             }
+            pixels[i] = Color::avg(iterations, colors).Clamp().GammaCorrect().ToInt();
         }
     }
 
@@ -116,12 +112,14 @@ public:
         glm::dvec3 *hp_ = ClosestVectorFrom(origin, direction, closest);
 
         if (closest == nullptr) {
+            delete hp_;
             return BLACK;
         }
-        glm::dvec3 hp=*hp_;
+        glm::dvec3 hp = *hp_;
 
         auto rnd = rand();
         if ((rnd % 1000) <= p * 1000) {
+            delete hp_;
             return closest->emission;
         }
 
@@ -146,6 +144,7 @@ public:
 
         Color ownColor = closest->BRDF * (glm::dot(n, randomDir) * ((2 * PI) / (1 - p)));
         Color res = closest->emission + nextEmission * ownColor;
+        delete hp_;
         return res;
     }
 };

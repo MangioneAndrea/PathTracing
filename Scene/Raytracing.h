@@ -2,7 +2,6 @@
 // Created by  Andrea Mangione  on 27/09/2021.
 //
 
-#include "Geometry/Ray/Ray.h"
 #include "Scene.h"
 #include "glm/ext.hpp"
 #include <cmath>
