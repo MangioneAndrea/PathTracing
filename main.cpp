@@ -18,7 +18,7 @@
 #define REFLECTION 4
 #define TEXTURE 5
 
-#define ACTIVE 3
+#define ACTIVE 4
 
 class Screen {
 private:

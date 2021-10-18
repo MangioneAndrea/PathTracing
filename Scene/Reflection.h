@@ -5,7 +5,7 @@
 #include "Scene.h"
 #include <cmath>
 
-#define iterations 4
+#define iterations 128
 
 class Reflection : public Scene {
 public:
@@ -16,27 +16,27 @@ public:
         this->width = width;
         this->height = height;
         objects = new std::vector<Sphere *>{
-                new Sphere{glm::vec3{-0.6, -0.7, -0.6}, 0.3, 0xDDDD11},
-                new Sphere{glm::vec3{0.3, -0.4, 0.3}, 0.6, 0xDDDDDD},
+                new Sphere{glm::vec3{-0.6, -0.7, -0.6}, 0.3, 0xDDDD11, 0.2},
+                new Sphere{glm::vec3{0.3, -0.4, 0.3}, 0.6, 0xDDDDDD, 0.2},
                 new Sphere{
-                        glm::vec3{0, 0, 101},
-                        100,
+                        glm::vec3{0, 0, 1001},
+                        1000,
                         0x11ff11,
                 },
                 new Sphere{
-                        glm::vec3{-101, 0, 0},
-                        100,
+                        glm::vec3{-1001, 0, 0},
+                        1000,
                         0xff1111,
                 },
                 new Sphere{
-                        glm::vec3{101, 0, 0},
-                        100,
+                        glm::vec3{1001, 0, 0},
+                        1000,
                         0x1111dd,
                 },
-                new Sphere{glm::vec3{0, 101, 0}, 100, 0xffffff, Color(0xffffff)},
+                new Sphere{glm::vec3{0, 1001, 0}, 1000, 0xffffff, Color(0xffffff)},
                 new Sphere{
-                        glm::vec3{0, -101, 0},
-                        100,
+                        glm::vec3{0, -1001, 0},
+                        1000,
                         0x888811,
                 }};
         pixels = (uint32_t *) malloc(sizeof(uint32_t) * width * height);
@@ -134,6 +134,11 @@ public:
             randomDir.z = fRand();
         } while (glm::length(randomDir) > 1);
         randomDir = glm::normalize(randomDir);
+
+
+        if ((rnd % 1000) <= closest->reflectivity * 1000) {
+            randomDir = n;
+        }
 
 
         if (glm::dot(randomDir, n) < 0) {
