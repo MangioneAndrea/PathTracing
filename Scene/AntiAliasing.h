@@ -7,11 +7,11 @@
 #include <chrono>
 #include <cmath>
 
-#define iterations 32
-#define aa_iterations 100
+#define iterations 2
+#define aa_iterations 10
 #define aa_sigma 0.5
 #define fRand() (((float) ((int) rand())) / (RAND_MAX / 2) - 1)
-#define pRand(min, max) (int) (min + fRand() * (max - min))
+#define pRand(min, max) (int) (min + (fRand() + 1) / 2 * (max - min))
 
 class AntiAliasing : public Scene {
 public:
@@ -94,10 +94,10 @@ public:
                 int pixel;
 
                 do {
-                    auto vertical = pRand(-aa_sigma, aa_sigma + 1);
-                    auto horizontal = pRand(-aa_sigma, aa_sigma + 1);
+                    auto vertical = pRand(-2 * aa_sigma, aa_sigma + 1);
+                    auto horizontal = pRand(-2 * aa_sigma, aa_sigma + 1);
 
-                    pixel = (vertical + (i / width)) * width + (horizontal + (i % width));
+                    pixel = (vertical + (i / width)) * width + ((horizontal + i) % width);
                 } while (pixel < 0 || pixel >= width * height);
 
 
