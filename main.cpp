@@ -1,11 +1,12 @@
 #include <SDL2/SDL.h>
 #undef main
+#include <Scene/AntiAliasing.h>
 #include <Scene/ColorShowdown.h>
 #include <Scene/Raytracing.h>
 #include <Scene/Raytracing2.h>
 #include <Scene/Reflection.h>
-#include <Scene/Texture.h>
 #include <Scene/Scene.h>
+#include <Scene/Texture.h>
 #include <thread>
 
 #define WIDTH 400
@@ -17,8 +18,16 @@
 #define RAY_TRACING2 3
 #define REFLECTION 4
 #define TEXTURE 5
+#define ANTI_ALIASING 6
 
-#define ACTIVE 4
+#define ACTIVE 6
+
+#if ACTIVE == 6
+#undef WIDTH
+#undef HEIGHT
+#define WIDTH 800
+#define HEIGHT 800
+#endif
 
 class Screen {
 private:
@@ -45,6 +54,9 @@ public:
                 return;
             case TEXTURE:
                 scene = new Texture(WIDTH, HEIGHT);
+                return;
+            case ANTI_ALIASING:
+                scene = new AntiAliasing(WIDTH, HEIGHT);
                 return;
         }
     }
