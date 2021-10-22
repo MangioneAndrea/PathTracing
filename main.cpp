@@ -9,6 +9,9 @@
 #include <Scene/Texture.h>
 #include <thread>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb/stb_image.h"
+
 #define WIDTH 400
 #define HEIGHT 400
 #define LATENCY_MIN 16.6f// 60 FPS
@@ -20,7 +23,7 @@
 #define TEXTURE 5
 #define ANTI_ALIASING 6
 
-#define ACTIVE 6
+#define ACTIVE 5
 
 #if ACTIVE == 6
 #undef WIDTH
@@ -53,7 +56,12 @@ public:
                 scene = new Reflection(WIDTH, HEIGHT);
                 return;
             case TEXTURE:
-                scene = new Texture(WIDTH, HEIGHT);
+                int fireWidth;
+                int fireHeight;
+                int channels;
+                unsigned char *img;
+                img = stbi_load("../fire.bmp", &fireHeight, &fireWidth, &channels, 0);
+                scene = new Texture(WIDTH, HEIGHT, img, fireWidth, fireHeight);
                 return;
             case ANTI_ALIASING:
                 scene = new AntiAliasing(WIDTH, HEIGHT);

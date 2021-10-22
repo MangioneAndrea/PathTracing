@@ -17,14 +17,20 @@ public:
     Color emission;
     double reflectivity = 0;
     Color BRDF;
+    uint32_t *texture = nullptr;
+    uint16_t textureWidth;
+    uint16_t textureHeight;
 
-
-    glm::dvec3 normalVectorAt(glm::dvec3 vector);
 
     Sphere(glm::dvec3 center, double radius, uint32_t color);
     Sphere(glm::dvec3 center, double radius, uint32_t color, double reflectivity);
     Sphere(glm::dvec3 center, double radius, uint32_t color, Color emission);
+    Sphere(glm::dvec3 center, double radius,uint32_t *texture, uint16_t textureWidth, uint16_t textureHeight);
     glm::dvec3 *ClosestIntersection(glm::dvec3 origin, glm::dvec3 direction);
+
+    Color emissionF(int x, int y);
+
+    Color BRDFat(int x, int y);
 };
 
 #endif// PATHTRACING_SPHERE_H

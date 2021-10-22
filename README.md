@@ -44,3 +44,8 @@ This is an extension of the previous program, this time the ball also reflects w
 Starting from Raytracing 2 this applies a post process antialiasing matching near pixels.
 Both images are half antialiased and half not. The difference here is the amount of rays
 ![img.png](./imgs/Antialias1.png)![img.png](./imgs/Antialias2.png)
+
+### Texture
+
+The ray tracing also supports textures, which can emit and diffuse their colors
+![img.png](./imgs/Texture.png)

@@ -2,21 +2,32 @@
 // Created by  Andrea Mangione  on 27/09/2021.
 //
 
+#include "../Helper/Util.h"
 #include "Scene.h"
 #include <cmath>
-
-#define iterations 4
+#define iterations 16
 
 class Texture : public Scene {
 public:
     Color colors[iterations];
-    Texture(int width, int height) {
-        srand((unsigned int) time(NULL));
+    uint32_t *result;
+    Texture(int width, int height, unsigned char *data, int fireWidth, int fireHeight) {
+
+        result = static_cast<uint32_t *>(malloc(fireWidth * fireHeight * sizeof(uint32_t)));
+        for (int i = 0; i < fireHeight * fireWidth * 3; i += 3) {
+            unsigned char tmp = data[i];
+            data[i] = data[i + 2];
+            data[i + 2] = tmp;
+            auto b = data[i];
+            auto g = (data[i + 1]);
+            auto r = (data[i + 2]);
+            auto res = b + (g << 8) + (r << 16);
+            result[i / 3] = res;
+        }
         this->width = width;
         this->height = height;
         objects = new std::vector<Sphere *>{
-                new Sphere{glm::vec3{-0.6, -0.7, -0.6}, 0.3, 0xDDDD11},
-                new Sphere{glm::vec3{0.3, -0.4, 0.3}, 0.6, 0xDDDDDD},
+                new Sphere{glm::vec3{0, -0, 0}, 0.6, result, static_cast<uint16_t>(fireHeight), static_cast<uint16_t>(fireWidth)},
                 new Sphere{
                         glm::vec3{0, 0, 101},
                         100,
@@ -32,7 +43,7 @@ public:
                         100,
                         0x1111dd,
                 },
-                new Sphere{glm::vec3{0, 101, 0}, 100, 0xffffff, Color(0xffffff)},
+                new Sphere{glm::vec3{0, 101, 0}, 100, 0xffffff},
                 new Sphere{
                         glm::vec3{0, -101, 0},
                         100,
@@ -64,11 +75,12 @@ public:
             glm::dvec3 d = glm::normalize(lookAt) + tmp + tmp2;//  lookAt.no.plus(&tmp).plus(&tmp2);
 
             pixels[i] = 0;
+
             for (int it = 0; it <= iterations; it++) {
                 if (i % (width * 40) == 0) {
                     it = it;
                 }
-                colors[it] = ComputeColor(eye, d);
+                colors[it] = ComputeColor(eye, d, (i % width), std::floor(i / width));
             }
             pixels[i] = Color::avg(iterations, colors).Clamp().GammaCorrect().ToInt();
         }
@@ -104,7 +116,7 @@ public:
 
 #define fRand() (((float) ((int) rand())) / (RAND_MAX / 2) - 1)
 #define p 0.1
-    Color ComputeColor(glm::dvec3 origin, glm::dvec3 direction) {
+    Color ComputeColor(glm::dvec3 origin, glm::dvec3 direction, int x, int y) {
 
         // auto r = Ray(origin, direction);
 
@@ -138,13 +150,15 @@ public:
         if (glm::dot(randomDir, n) < 0) {
             randomDir = randomDir * glm::dvec1(-1);
         }
+        Color txture = closest->BRDFat(x, y);
 
-        auto nextEmission = ComputeColor(hp, randomDir);
+        auto nextEmission = ComputeColor(hp, randomDir, x, y);
 
-
-        Color ownColor = closest->BRDF * (glm::dot(n, randomDir) * ((2 * PI) / (1 - p)));
-        Color res = closest->emission + nextEmission * ownColor;
+        Color ownColor = txture * (glm::dot(n, randomDir) * ((2 * PI) / (1 - p)));
+        Color res = closest->emissionF((hp.x + 1) * 300, (hp.y + 1) *188) + nextEmission * ownColor;
         delete hp_;
         return res;
     }
 };
+
+#undef p

@@ -22,12 +22,14 @@ Sphere::Sphere(glm::dvec3 center, double radius, uint32_t color,
     : center(center), radius(radius), color(color),
       BRDF(this->color * (1. / M_PI)), emission(emission) {}
 
+Sphere::Sphere(glm::dvec3 center, double radius, uint32_t *texture, uint16_t textureWidth, uint16_t textureHeight)
+    : center(center), radius(radius), texture(texture), textureWidth(textureWidth), textureHeight(textureHeight) {
+}
+
 
 glm::dvec3 *Sphere::ClosestIntersection(glm::dvec3 origin, glm::dvec3 direction) {// geometric solution
     // 1 * delta2 + 2CE*d * delta + |CE|2 -r2=0
     // intersects= sqrt ( (2CE*d)2 - 4 * 1 * (|CE|-r2)2)
-
-
     auto u = glm::normalize(direction);
     glm::dvec3 CE = origin - (this->center);
 
@@ -50,6 +52,21 @@ glm::dvec3 *Sphere::ClosestIntersection(glm::dvec3 origin, glm::dvec3 direction)
     glm::dvec3 res = u * glm::dvec1(best) + (origin);
     return new glm::dvec3{res.x, res.y, res.z};
 }
-glm::dvec3 Sphere::normalVectorAt(glm::dvec3 vector) {
-    return glm::normalize(vector - this->center);
+Color Sphere::BRDFat(int x, int y) {
+    if (texture == nullptr) {
+        return BRDF;
+    }
+    auto b = x % textureWidth;
+    auto a = (y % textureHeight) * textureWidth;
+    auto res = Color(texture[a + b]);
+    return res;
+}
+Color Sphere::emissionF(int x, int y) {
+    if (texture == nullptr) {
+        return emission;
+    }
+    auto b = x % textureWidth;
+    auto a = (y % textureHeight) * textureWidth;
+    auto res = Color(texture[a + b]);
+    return res*4;
 }
