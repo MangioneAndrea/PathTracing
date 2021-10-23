@@ -22,8 +22,8 @@ Sphere::Sphere(glm::dvec3 center, double radius, uint32_t color,
     : center(center), radius(radius), color(color),
       BRDF(this->color * (1. / M_PI)), emission(emission) {}
 
-Sphere::Sphere(glm::dvec3 center, double radius, uint32_t *texture, uint16_t textureWidth, uint16_t textureHeight)
-    : center(center), radius(radius), texture(texture), textureWidth(textureWidth), textureHeight(textureHeight) {
+Sphere::Sphere(glm::dvec3 center, double radius, uint32_t *texture, uint16_t textureWidth, uint16_t textureHeight, bool emissive)
+    : center(center), radius(radius), texture(texture), textureWidth(textureWidth), textureHeight(textureHeight), emission(emissive ? 0xffffff : 0x000000) {
 }
 
 
@@ -62,11 +62,11 @@ Color Sphere::BRDFat(int x, int y) {
     return res;
 }
 Color Sphere::emissionF(int x, int y) {
-    if (texture == nullptr) {
+    if (texture == nullptr || emission.ToInt() == 0) {
         return emission;
     }
     auto b = x % textureWidth;
     auto a = (y % textureHeight) * textureWidth;
     auto res = Color(texture[a + b]);
-    return res*4;
+    return res * 4;
 }

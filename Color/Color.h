@@ -91,7 +91,7 @@ public:
     }
 };
 #ifndef BLACK
-#define BLACK Color(0x000000);
-#define WHITE Color(0xFFFFFF);
+#define BLACK Color(0x000000)
+#define WHITE Color(0xFFFFFF)
 #endif
 #endif

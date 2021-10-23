@@ -9,6 +9,14 @@ and `.lib` files into a `lib` folder in the root and all the include files into 
 
 ## Content
 
+### Examples
+
+This project's aim is to create and render 3d scenes made of spheres using raytracing
+![img.png](./imgs/ExampleScene1.png)
+![img.png](./imgs/ExampleScene2.png)
+
+## Features
+
 ### Empty
 
 This program is the draft for other projects, as it contains all the boilerplate

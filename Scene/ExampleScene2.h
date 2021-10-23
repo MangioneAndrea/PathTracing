@@ -4,50 +4,66 @@
 
 #include "Scene.h"
 #include <cmath>
-#define iterations 16
+#define iterations 256
 
-class Texture : public Scene {
+class ExampleScene2 : public Scene {
 public:
     Color colors[iterations];
     uint32_t *result;
-    Texture(int width, int height, unsigned char *data, int fireWidth, int fireHeight) {
-
-        result = static_cast<uint32_t *>(malloc(fireWidth * fireHeight * sizeof(uint32_t)));
-        for (int i = 0; i < fireHeight * fireWidth * 3; i += 3) {
-            unsigned char tmp = data[i];
-            data[i] = data[i + 2];
-            data[i + 2] = tmp;
-            auto b = data[i];
-            auto g = (data[i + 1]);
-            auto r = (data[i + 2]);
-            auto res = b + (g << 8) + (r << 16);
-            result[i / 3] = res;
-        }
+    ExampleScene2(int width, int height) {
         this->width = width;
         this->height = height;
         objects = new std::vector<Sphere *>{
-                new Sphere{glm::vec3{0, -0, 0}, 0.6, result, static_cast<uint16_t>(fireHeight), static_cast<uint16_t>(fireWidth),true},
                 new Sphere{
-                        glm::vec3{0, 0, 101},
-                        100,
-                        0x11ff11,
+                        glm::vec3{0, 1.3, 9},
+                        0.4,
+                        0xfe6b00,
+                        Color(0xfe6b00) * 16},
+
+                new Sphere{
+                        glm::vec3{1.7, -0.3, 10},
+                        2.15,
+                        0x1f140e},
+                new Sphere{
+                        glm::vec3{-1.7, -0.3, 10},
+                        2.15,
+                        0x1f140e},
+                new Sphere{
+                        glm::vec3{0, 11, 10},
+                        10,
+                        0x1f140e},
+
+
+                new Sphere{
+                        glm::vec3{0, 1.2, 5},
+                        0.5,
+                        0xfe6b00,
+                        Color(0xfe6b00) * 20},
+
+
+                new Sphere{
+                        glm::vec3{0, 0.9, 0},
+                        0.4,
+                        0xfe6b00,
+                        Color(0xfe6b00)},
+                new Sphere{
+                        glm::vec3{0, 0.9, -0.1},
+                        0.38,
+                        0x000000},
+                new Sphere{
+                        glm::vec3{0, 0, 1011},
+                        1000,
+                        0x1f140e,
                 },
                 new Sphere{
-                        glm::vec3{-101, 0, 0},
-                        100,
-                        0xff1111,
-                },
+                        glm::vec3{0, -1000.9, 0},
+                        1000,
+                        0xfe6b00,
+                        1},
                 new Sphere{
-                        glm::vec3{101, 0, 0},
-                        100,
-                        0x1111dd,
-                },
-                new Sphere{glm::vec3{0, 101, 0}, 100, 0xffffff},
-                new Sphere{
-                        glm::vec3{0, -101, 0},
-                        100,
-                        0x888811,
-                }};
+                        glm::vec3{0, -1001, 0},
+                        1000,
+                        0x4f1507}};
         pixels = (uint32_t *) malloc(sizeof(uint32_t) * width * height);
         aspectRatio = (double) width / (double) height;
         eye = glm::dvec3(0, 0, -14);
@@ -81,7 +97,7 @@ public:
                 }
                 colors[it] = ComputeColor(eye, d, (i % width), std::floor(i / width));
             }
-            pixels[i] = Color::avg(iterations, colors).Clamp().GammaCorrect().ToInt();
+            pixels[i] = Color::avg(iterations, colors).Clamp().ToInt();
         }
     }
 
@@ -154,7 +170,7 @@ public:
         auto nextEmission = ComputeColor(hp, randomDir, x, y);
 
         Color ownColor = txture * (glm::dot(n, randomDir) * ((2 * PI) / (1 - p)));
-        Color res = closest->emissionF((hp.x + 1) * 300, (hp.y + 1) *188) + nextEmission * ownColor;
+        Color res = closest->emissionF((hp.x + 1) * 300, (hp.y + 1) * 188) + nextEmission * ownColor;
         delete hp_;
         return res;
     }

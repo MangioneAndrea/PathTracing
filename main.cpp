@@ -2,6 +2,8 @@
 #undef main
 #include <Scene/AntiAliasing.h>
 #include <Scene/ColorShowdown.h>
+#include <Scene/ExampleScene1.h>
+#include <Scene/ExampleScene2.h>
 #include <Scene/Raytracing.h>
 #include <Scene/Raytracing2.h>
 #include <Scene/Reflection.h>
@@ -22,8 +24,10 @@
 #define REFLECTION 4
 #define TEXTURE 5
 #define ANTI_ALIASING 6
+#define SCENE1 7
+#define SCENE2 8
 
-#define ACTIVE 5
+#define ACTIVE 8
 
 #if ACTIVE == 6
 #undef WIDTH
@@ -31,6 +35,8 @@
 #define WIDTH 800
 #define HEIGHT 800
 #endif
+
+
 
 class Screen {
 private:
@@ -42,6 +48,10 @@ private:
 
 public:
     Screen() : running(0) {
+        int textureWidth;
+        int textureHeight;
+        int channels;
+        unsigned char *img;
         switch (ACTIVE) {
             case COLOR_SHOWDOWN:
                 scene = new ColorShowdown();
@@ -56,15 +66,17 @@ public:
                 scene = new Reflection(WIDTH, HEIGHT);
                 return;
             case TEXTURE:
-                int fireWidth;
-                int fireHeight;
-                int channels;
-                unsigned char *img;
-                img = stbi_load("../fire.bmp", &fireHeight, &fireWidth, &channels, 0);
-                scene = new Texture(WIDTH, HEIGHT, img, fireWidth, fireHeight);
+                img = stbi_load("../fire.bmp", &textureHeight, &textureWidth, &channels, 0);
+                scene = new Texture(WIDTH, HEIGHT, img, textureWidth, textureHeight);
                 return;
             case ANTI_ALIASING:
                 scene = new AntiAliasing(WIDTH, HEIGHT);
+                return;
+            case SCENE1:
+                scene = new ExampleScene1(WIDTH, HEIGHT);
+                return;
+            case SCENE2:
+                scene = new ExampleScene2(WIDTH, HEIGHT);
                 return;
         }
     }
