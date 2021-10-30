@@ -73,6 +73,14 @@ public:
         };
     }
 
+    Color UndoGammaCorrect() const {
+        return {
+                static_cast<double>(pow((r), GAMMA)),
+                static_cast<double>(pow((g), GAMMA)),
+                static_cast<double>(pow((b), GAMMA)),
+        };
+    }
+
     Color avg(Color other) {
         return {(double) (r / 2 + other.r / 2), (double) (g / 2 + other.g / 2),
                 (double) (b / 2 + other.b / 2)};

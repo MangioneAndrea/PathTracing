@@ -165,7 +165,7 @@ public:
         if (glm::dot(randomDir, n) < 0) {
             randomDir = randomDir * glm::dvec1(-1);
         }
-        Color txture = closest->BRDFat(x, y);
+        Color txture = closest->BRDF(x, y);
 
         auto nextEmission = ComputeColor(hp, randomDir, x, y);
 

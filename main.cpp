@@ -66,8 +66,9 @@ public:
                 scene = new Reflection(WIDTH, HEIGHT);
                 return;
             case TEXTURE:
-                img = stbi_load("../fire.bmp", &textureHeight, &textureWidth, &channels, 0);
-                scene = new Texture(WIDTH, HEIGHT, img, textureWidth, textureHeight);
+                img = stbi_load("../lava.bmp", &textureHeight, &textureWidth, &channels, 0);
+                scene = new Texture(WIDTH, HEIGHT, img, textureWidth, textureHeight,channels);
+
                 return;
             case ANTI_ALIASING:
                 scene = new AntiAliasing(WIDTH, HEIGHT);

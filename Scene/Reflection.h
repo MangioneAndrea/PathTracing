@@ -5,7 +5,7 @@
 #include "Scene.h"
 #include <cmath>
 
-#define iterations 128
+#define iterations 200
 
 class Reflection : public Scene {
 public:
@@ -16,8 +16,8 @@ public:
         this->width = width;
         this->height = height;
         objects = new std::vector<Sphere *>{
-                new Sphere{glm::vec3{-0.6, -0.7, -0.6}, 0.3, 0xDDDD11, 0.2},
-                new Sphere{glm::vec3{0.3, -0.4, 0.3}, 0.6, 0xDDDDDD, 0.2},
+                new Sphere{glm::vec3{-0.6, -0.7, -0.6}, 0.3, 0xDDDD11, 1},
+                new Sphere{glm::vec3{0.3, -0.4, 0.3}, 0.6, 0xDDDDDD, 1},
                 new Sphere{
                         glm::vec3{0, 0, 1001},
                         1000,
@@ -49,8 +49,9 @@ public:
     void GetPixels() override {
         glm::dvec3 up = glm::vec3(0, 1, 0);
 
-        auto r = glm::normalize(glm::cross(up, lookAt));
-        auto u = glm::normalize(glm::cross(lookAt, r));
+        auto direction = glm::normalize(lookAt - eye);
+        auto r = glm::normalize(glm::cross(up, direction));
+        auto u = glm::normalize(glm::cross(direction, r));
 
         double fovScale = std::tan(fov / 2);
         for (auto i = 0; i < width * height; i++) {
@@ -62,14 +63,14 @@ public:
             y = (y / ((float) height / 2) - 1);
             auto tmp = r * glm::dvec1(fovScale * x);
             auto tmp2 = u * (-fovScale * y);
-            glm::dvec3 d = glm::normalize(lookAt) + tmp + tmp2;
+            glm::dvec3 d = direction + tmp + tmp2;
 
             pixels[i] = 0;
-            for (int it = 0; it <= iterations; it++) {
+            for (int it = 0; it < iterations; it++) {
                 if (i % (width * 40) == 0) {
                     it = it;
                 }
-                colors[it] = ComputeColor(eye, d);
+                colors[it] = ComputeColor(eye, d, 0);
             }
             pixels[i] = Color::avg(iterations, colors).Clamp().GammaCorrect().ToInt();
         }
@@ -105,14 +106,14 @@ public:
 
 #define fRand() (((float) ((int) rand())) / (RAND_MAX / 2) - 1)
 #define p 0.1
-    Color ComputeColor(glm::dvec3 origin, glm::dvec3 direction) {
+    Color ComputeColor(glm::dvec3 origin, glm::dvec3 direction, int count) {
 
         // auto r = Ray(origin, direction);
 
         Sphere *closest = nullptr;
         glm::dvec3 *hp_ = ClosestVectorFrom(origin, direction, closest);
 
-        if (closest == nullptr) {
+        if (closest == nullptr || count > 10) {
             delete hp_;
             return BLACK;
         }
@@ -136,19 +137,21 @@ public:
         randomDir = glm::normalize(randomDir);
 
 
-        if ((rnd % 1000) <= closest->reflectivity * 1000) {
-            randomDir = n;
-        }
-
-
         if (glm::dot(randomDir, n) < 0) {
             randomDir = randomDir * glm::dvec1(-1);
         }
 
-        auto nextEmission = ComputeColor(hp, randomDir);
+        auto nextEmission = ComputeColor(hp, randomDir, count + 1);
+
+        Color *specular = nullptr;
+
+        if (closest->reflectivity > 0 && glm::dot(randomDir, n) > 0.9) {
+            Color next = ComputeColor(hp, n, count + 1);
+            specular = &next;
+        }
 
 
-        Color ownColor = closest->BRDFat(0, 0) * (glm::dot(n, randomDir) * ((2 * PI) / (1 - p)));
+        Color ownColor = closest->BRDF(0, 0, specular) * (glm::dot(n, randomDir) * ((2 * PI) / (1 - p)));
         Color res = closest->emission + nextEmission * ownColor;
         delete hp_;
         return res;

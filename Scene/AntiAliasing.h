@@ -7,7 +7,7 @@
 #include <chrono>
 #include <cmath>
 
-#define iterations 2
+#define iterations 15
 #define aa_iterations 10
 #define aa_sigma 0.5
 #define fRand() (((float) ((int) rand())) / (RAND_MAX / 2) - 1)
@@ -166,7 +166,7 @@ public:
         auto nextEmission = ComputeColor(hp, randomDir);
 
 
-        Color ownColor = closest->BRDFat(0, 0) * (glm::dot(n, randomDir) * ((2 * PI) / (1 - p)));
+        Color ownColor = closest->BRDF(0, 0) * (glm::dot(n, randomDir) * ((2 * PI) / (1 - p)));
         Color res = closest->emission + nextEmission * ownColor;
         delete hp_;
         return res;

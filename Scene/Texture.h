@@ -4,29 +4,36 @@
 
 #include "Scene.h"
 #include <cmath>
-#define iterations 16
+#define iterations 160
 
 class Texture : public Scene {
 public:
     Color colors[iterations];
     uint32_t *result;
-    Texture(int width, int height, unsigned char *data, int fireWidth, int fireHeight) {
+    Texture(int width, int height, unsigned char *data, int fireWidth, int fireHeight, int channels) {
 
         result = static_cast<uint32_t *>(malloc(fireWidth * fireHeight * sizeof(uint32_t)));
-        for (int i = 0; i < fireHeight * fireWidth * 3; i += 3) {
-            unsigned char tmp = data[i];
-            data[i] = data[i + 2];
-            data[i + 2] = tmp;
-            auto b = data[i];
-            auto g = (data[i + 1]);
-            auto r = (data[i + 2]);
-            auto res = b + (g << 8) + (r << 16);
-            result[i / 3] = res;
+        for (int i = 0; i < fireHeight * fireWidth; i++) {
+            if (channels == 3) {
+                auto r = data[i * 3];
+                auto g = (data[i * 3 + 1]);
+                auto b = (data[i * 3 + 2]);
+                auto res = b + (g << 8) + (r << 16);
+
+                result[i] = Color(res).UndoGammaCorrect().ToInt();
+            } else {
+                auto r = data[i * 3];
+                auto g = (data[i * 3 + 1]);
+                auto b = (data[i * 3 + 2]);
+                auto opacity = data[i * 3 + 3];
+                auto res = b + (g << 8) + (r << 16);
+                result[i] = Color(res).UndoGammaCorrect().ToInt();
+            }
         }
         this->width = width;
         this->height = height;
         objects = new std::vector<Sphere *>{
-                new Sphere{glm::vec3{0, -0, 0}, 0.6, result, static_cast<uint16_t>(fireHeight), static_cast<uint16_t>(fireWidth),true},
+                new Sphere{glm::vec3{0, -0, 0}, 0.6, result, static_cast<uint16_t>(fireHeight), static_cast<uint16_t>(fireWidth), true},
                 new Sphere{
                         glm::vec3{0, 0, 101},
                         100,
@@ -149,12 +156,12 @@ public:
         if (glm::dot(randomDir, n) < 0) {
             randomDir = randomDir * glm::dvec1(-1);
         }
-        Color txture = closest->BRDFat(x, y);
+        Color txture = closest->BRDF(x, y);
 
         auto nextEmission = ComputeColor(hp, randomDir, x, y);
 
         Color ownColor = txture * (glm::dot(n, randomDir) * ((2 * PI) / (1 - p)));
-        Color res = closest->emissionF((hp.x + 1) * 300, (hp.y + 1) *188) + nextEmission * ownColor;
+        Color res = closest->emissionF((hp.x + 1) * 300, (hp.y + 1) * 188) + nextEmission * ownColor;
         delete hp_;
         return res;
     }

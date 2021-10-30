@@ -50,7 +50,15 @@ glm::dvec3 *Sphere::ClosestIntersection(glm::dvec3 origin, glm::dvec3 direction)
     glm::dvec3 res = u * glm::dvec1(best) + (origin);
     return new glm::dvec3{res.x, res.y, res.z};
 }
-Color Sphere::BRDFat(int x, int y) {
+Color Sphere::BRDF(int x, int y, Color *specular) {
+    if (specular != nullptr) {
+       return (this->color * (1 - reflectivity) + ((*specular) * reflectivity)) * (1. / M_PI);
+    }
+
+    return this->color * (1. / M_PI);
+}
+Color Sphere::BRDF(int x, int y) {
+
     if (texture == nullptr) {
         return this->color * (1. / M_PI);
     }

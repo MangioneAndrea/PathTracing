@@ -50,8 +50,9 @@ public:
     void GetPixels() override {
         glm::dvec3 up = glm::vec3(0, 1, 0);
 
-        auto r = glm::normalize(glm::cross(up, lookAt));
-        auto u = glm::normalize(glm::cross(lookAt, r));
+        auto direction = glm::normalize(lookAt - eye);
+        auto r = glm::normalize(glm::cross(up, direction));
+        auto u = glm::normalize(glm::cross(direction, r));
 
         double fovScale = std::tan(fov / 2);
         for (auto i = 0; i < width * height; i++) {
@@ -59,11 +60,11 @@ public:
             auto x = (float) (i % width);
             auto y = (float) std::floor(i / width);
             // x,y from -1 to 1
-            x = (x / ((float) width / 2) - 1)  * aspectRatio;
-            y = (y / ((float) height / 2) - 1) ;
+            x = (x / ((float) width / 2) - 1) * aspectRatio;
+            y = (y / ((float) height / 2) - 1);
             auto tmp = r * glm::dvec1(fovScale * x);
             auto tmp2 = u * (-fovScale * y);
-            glm::dvec3 d = glm::normalize(lookAt) + tmp + tmp2;//  lookAt.no.plus(&tmp).plus(&tmp2);
+            glm::dvec3 d = direction + tmp + tmp2;//  lookAt.no.plus(&tmp).plus(&tmp2);
 
             pixels[i] = 0;
             for (int it = 0; it <= iterations; it++) {
@@ -144,7 +145,7 @@ public:
         auto nextEmission = ComputeColor(hp, randomDir);
 
 
-        Color ownColor = closest->BRDFat(0, 0) * (glm::dot(n, randomDir) * ((2 * PI) / (1 - p)));
+        Color ownColor = closest->BRDF(0, 0) * (glm::dot(n, randomDir) * ((2 * PI) / (1 - p)));
         Color res = closest->emission + nextEmission * ownColor;
         delete hp_;
         return res;

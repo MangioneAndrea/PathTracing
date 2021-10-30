@@ -50,8 +50,8 @@ This is an extension of the previous program, this time the ball also reflects w
 ### Anti-aliasing
 
 Starting from Raytracing 2 this applies a post process antialiasing matching near pixels.
-Both images are half antialiased and half not. The difference here is the amount of rays
-![img.png](./imgs/Antialias1.png)![img.png](./imgs/Antialias2.png)
+The window is 4 times bigger (2 * Width, 2 * Height) the process is way faster and produces a cleaner image
+![img.png](./imgs/Antialias.png)
 
 ### Texture
 
