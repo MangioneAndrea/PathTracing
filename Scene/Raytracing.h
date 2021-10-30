@@ -41,7 +41,7 @@ public:
                 }};
         pixels = (uint32_t *) malloc(sizeof(uint32_t) * width * height);
         aspectRatio = (double) width / (double) height;
-        eye = glm::dvec3(0, 0, -14);
+        eye = glm::dvec3(0, 0, -4);
         lookAt = glm::dvec3(0, 0, 6);
     }
 
@@ -58,8 +58,8 @@ public:
             auto x = (float) (i % width);
             auto y = (float) std::floor(i / width);
             // x,y from -1 to 1
-            x = (x / ((float) width / 2) - 1) * fovScale * aspectRatio;
-            y = (y / ((float) height / 2) - 1) * fovScale;
+            x = (x / ((float) width / 2) - 1)  * aspectRatio;
+            y = (y / ((float) height / 2) - 1) ;
             auto tmp = r * glm::dvec1(fovScale * x);
             auto tmp2 = u * (-fovScale * y);
             glm::dvec3 d = glm::normalize(lookAt) + tmp + tmp2;//  lookAt.no.plus(&tmp).plus(&tmp2);
@@ -106,7 +106,7 @@ public:
         // auto r = Ray(origin, direction);
 
         Sphere *closest = nullptr;
-        glm::dvec3 *hp_ = ClosestVectorFrom(origin, direction, closest);
+        ClosestVectorFrom(origin, direction, closest);
 
         if (closest == nullptr) {
             return BLACK;

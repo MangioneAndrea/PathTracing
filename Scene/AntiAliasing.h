@@ -11,12 +11,11 @@
 #define aa_iterations 10
 #define aa_sigma 0.5
 #define fRand() (((float) ((int) rand())) / (RAND_MAX / 2) - 1)
-#define pRand(min, max) (int) (min + (fRand() + 1) / 2 * (max - min))
+#define pRand(min, max) (min + (fRand() + 1) / 2 * (max - min))
 
 class AntiAliasing : public Scene {
 public:
-    Color colors[iterations];
-    Color avgcolors[aa_iterations];
+    Color colors[iterations * aa_iterations];
     AntiAliasing(int width, int height) {
         srand((unsigned int) time(NULL));
         this->width = width;
@@ -47,7 +46,7 @@ public:
                 }};
         pixels = (uint32_t *) malloc(sizeof(uint32_t) * width * height);
         aspectRatio = (double) width / (double) height;
-        eye = glm::dvec3(0, 0, -14);
+        eye = glm::dvec3(0, 0, -4);
         lookAt = glm::dvec3(0, 0, 6);
     }
 
@@ -67,20 +66,28 @@ public:
 
             auto x = (float) (i0 % width);
             auto y = (float) std::floor(i0 / width);
-            // x,y from -1 to 1
-            x = (x / ((float) width / 2) - 1) * fovScale * aspectRatio;
-            y = (y / ((float) height / 2) - 1) * fovScale;
-            auto tmp = r * glm::dvec1(fovScale * x);
-            auto tmp2 = u * (-fovScale * y);
-            glm::dvec3 d = glm::normalize(lookAt) + tmp + tmp2;//  lookAt.no.plus(&tmp).plus(&tmp2);
 
-            for (int it = 0; it <= iterations; it++) {
-                if (i % (width * 40) == 0) {
-                    it = it;
+            for (int aa = 0; aa < aa_iterations; aa++) {
+                float xShifted = x + pRand(-2 * aa_sigma, aa_sigma + 1);
+                float yShifted = y + pRand(-2 * aa_sigma, aa_sigma + 1);
+                //pixel = (vertical + (i / width)) * width + ((horizontal + i) % width);
+                // x,y from -1 to 1
+                xShifted = (xShifted / ((float) width / 2) - 1) * aspectRatio;
+                yShifted = (yShifted / ((float) height / 2) - 1);
+
+                auto tmp = r * glm::dvec1(fovScale * xShifted);
+                auto tmp2 = u * (-fovScale * yShifted);
+                glm::dvec3 d = glm::normalize(lookAt) + tmp + tmp2;
+
+                for (int it = 0; it < iterations; it++) {
+                    if (i % (width * 40) == 0) {
+                        it = it;
+                    }
+                    auto idx=aa * (iterations) + it;
+                    colors[idx] = ComputeColor(eye, d);
                 }
-                colors[it] = ComputeColor(eye, d);
             }
-            auto col = Color::avg(iterations, colors).Clamp().GammaCorrect().ToInt();
+            auto col = Color::avg(iterations * aa_iterations, colors).Clamp().GammaCorrect().ToInt();
 
             pixels[i0] = col;
             pixels[i1] = col;
@@ -88,23 +95,6 @@ public:
             pixels[i3] = col;
         }
 
-        for (auto i = 0; i < width * height; i++) {
-
-            for (auto &avgcolor : avgcolors) {
-                int pixel;
-
-                do {
-                    auto vertical = pRand(-2 * aa_sigma, aa_sigma + 1);
-                    auto horizontal = pRand(-2 * aa_sigma, aa_sigma + 1);
-
-                    pixel = (vertical + (i / width)) * width + ((horizontal + i) % width);
-                } while (pixel < 0 || pixel >= width * height);
-
-
-                avgcolor = Color(pixels[pixel]);
-            }
-            pixels[i] = Color::avg(aa_iterations, avgcolors).ToInt();
-        }
     }
 
 
@@ -176,7 +166,7 @@ public:
         auto nextEmission = ComputeColor(hp, randomDir);
 
 
-        Color ownColor = closest->BRDF * (glm::dot(n, randomDir) * ((2 * PI) / (1 - p)));
+        Color ownColor = closest->BRDFat(0, 0) * (glm::dot(n, randomDir) * ((2 * PI) / (1 - p)));
         Color res = closest->emission + nextEmission * ownColor;
         delete hp_;
         return res;

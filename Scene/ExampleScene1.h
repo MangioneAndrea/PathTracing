@@ -46,8 +46,8 @@ public:
                 auto x = (float) (i % width);
                 auto y = (float) std::floor(i / width);
                 // x,y from -1 to 1
-                x = (x / ((float) width / 2) - 1) * fovScale * aspectRatio;
-                y = (y / ((float) height / 2) - 1) * fovScale;
+                x = (x / ((float) width / 2) - 1) * aspectRatio;
+                y = (y / ((float) height / 2) - 1);
                 auto tmp = r * glm::dvec1(fovScale * x);
                 auto tmp2 = u * (-fovScale * y);
                 glm::dvec3 d = glm::normalize(lookAt) + tmp + tmp2;//  lookAt.no.plus(&tmp).plus(&tmp2);
@@ -128,11 +128,11 @@ public:
             if (glm::dot(randomDir, n) < 0) {
                 randomDir = randomDir * glm::dvec1(-1);
             }
-            Color txture = closest->BRDFat(x, y);
+            Color texture = closest->BRDFat(x, y);
 
             auto nextEmission = ComputeColor(hp, randomDir, x, y);
 
-            Color ownColor = txture * (glm::dot(n, randomDir) * ((2 * PI) / (1 - p)));
+            Color ownColor = texture * (glm::dot(n, randomDir) * ((2 * PI) / (1 - p)));
             Color res = closest->emissionF((hp.x + 1) * 300, (hp.y + 1) *188) + nextEmission * ownColor;
             delete hp_;
             return res;

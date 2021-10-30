@@ -16,7 +16,6 @@ public:
     Color color;
     Color emission;
     double reflectivity = 0;
-    Color BRDF;
     uint32_t *texture = nullptr;
     uint16_t textureWidth;
     uint16_t textureHeight;

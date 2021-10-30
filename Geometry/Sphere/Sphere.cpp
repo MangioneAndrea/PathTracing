@@ -8,19 +8,17 @@
 #include <glm/ext.hpp>
 
 Sphere::Sphere(glm::dvec3 center, double radius, uint32_t color, double reflectivity)
-    : center(center), radius(radius), color(color), emission(0),
-      BRDF(this->color * (1. / M_PI)) {
+    : center(center), radius(radius), color(color), emission(0) {
     this->reflectivity = reflectivity;
 }
 
 Sphere::Sphere(glm::dvec3 center, double radius, uint32_t color)
-    : center(center), radius(radius), color(color), emission(0),
-      BRDF(this->color * (1. / M_PI)) {}
+    : center(center), radius(radius), color(color), emission(0) {}
 
 Sphere::Sphere(glm::dvec3 center, double radius, uint32_t color,
                Color emission)
     : center(center), radius(radius), color(color),
-      BRDF(this->color * (1. / M_PI)), emission(emission) {}
+      emission(emission) {}
 
 Sphere::Sphere(glm::dvec3 center, double radius, uint32_t *texture, uint16_t textureWidth, uint16_t textureHeight, bool emissive)
     : center(center), radius(radius), texture(texture), textureWidth(textureWidth), textureHeight(textureHeight), emission(emissive ? 0xffffff : 0x000000) {
@@ -54,7 +52,7 @@ glm::dvec3 *Sphere::ClosestIntersection(glm::dvec3 origin, glm::dvec3 direction)
 }
 Color Sphere::BRDFat(int x, int y) {
     if (texture == nullptr) {
-        return BRDF;
+        return this->color * (1. / M_PI);
     }
     auto b = x % textureWidth;
     auto a = (y % textureHeight) * textureWidth;
