@@ -5,7 +5,7 @@
 #include "Scene.h"
 #include <cmath>
 
-#define iterations 200
+#define iterations 50
 
 class Reflection : public Scene {
 public:
@@ -145,8 +145,10 @@ public:
 
         Color *specular = nullptr;
 
-        if (closest->reflectivity > 0 && glm::dot(randomDir, n) > 0.9) {
-            Color next = ComputeColor(hp, n, count + 1);
+        if (closest->reflectivity > 0) {
+            double nl = glm::length(n);
+            auto r = direction - (glm::dot(direction * glm::dvec3(2, 2, 2), n)) / (nl * nl) * n;
+            Color next = ComputeColor(hp, r, count + 1);
             specular = &next;
         }
 
