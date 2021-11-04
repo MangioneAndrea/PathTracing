@@ -94,17 +94,11 @@ public:
         }
         texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGB888,
                                     SDL_TEXTUREACCESS_STREAMING, WIDTH, HEIGHT);
-        std::thread drawThread(&Screen::drawLoop, this);
+        //std::thread drawThread(&Screen::drawLoop, this);
         std::thread tickThread(&Screen::tickLoop, this);
         SDL_Event event;
         this->running = 1;
-        while (running) {
-            if (SDL_PollEvent(&event)) {
-                if (event.type == SDL_QUIT)
-                    running = 0;
-            }
-        }
-        drawThread.detach();
+        drawLoop();
         tickThread.detach();
     }
 

@@ -9,9 +9,8 @@
 
 #define iterations 15
 #define aa_iterations 10
-#define aa_sigma 0.5
+#define aa_sigma 0.5f
 #define fRand() (((float) ((int) rand())) / (RAND_MAX / 2) - 1)
-#define pRand(min, max) (min + (fRand() + 1) / 2 * (max - min))
 
 class AntiAliasing : public Scene {
 public:
@@ -54,8 +53,9 @@ public:
     void GetPixels() override {
         glm::dvec3 up = glm::vec3(0, 1, 0);
 
-        auto r = glm::normalize(glm::cross(up, lookAt));
-        auto u = glm::normalize(glm::cross(lookAt, r));
+        auto direction = glm::normalize(lookAt - eye);
+        auto r = glm::normalize(glm::cross(up, direction));
+        auto u = glm::normalize(glm::cross(direction, r));
 
         double fovScale = std::tan(fov / 2);
         for (auto i = 0; i < (width / 2) * (height / 2); i++) {
@@ -67,9 +67,10 @@ public:
             auto x = (float) (i0 % width);
             auto y = (float) std::floor(i0 / width);
 
-            for (int aa = 0; aa < aa_iterations; aa++) {
-                float xShifted = x + pRand(-2 * aa_sigma, aa_sigma + 1);
-                float yShifted = y + pRand(-2 * aa_sigma, aa_sigma + 1);
+            for (int aa = 0; aa < iterations; aa++) {
+
+                float xShifted =  glm::gaussRand(x,aa_sigma);
+                float yShifted =  glm::gaussRand(y,aa_sigma);
                 //pixel = (vertical + (i / width)) * width + ((horizontal + i) % width);
                 // x,y from -1 to 1
                 xShifted = (xShifted / ((float) width / 2) - 1) * aspectRatio;
@@ -77,24 +78,16 @@ public:
 
                 auto tmp = r * glm::dvec1(fovScale * xShifted);
                 auto tmp2 = u * (-fovScale * yShifted);
-                glm::dvec3 d = glm::normalize(lookAt) + tmp + tmp2;
-
-                for (int it = 0; it < iterations; it++) {
-                    if (i % (width * 40) == 0) {
-                        it = it;
-                    }
-                    auto idx=aa * (iterations) + it;
-                    colors[idx] = ComputeColor(eye, d);
-                }
+                glm::dvec3 d = direction + tmp + tmp2;
+                colors[aa] = ComputeColor(eye, d);
             }
-            auto col = Color::avg(iterations * aa_iterations, colors).Clamp().GammaCorrect().ToInt();
+            auto col = Color::avg(iterations, colors).Clamp().GammaCorrect().ToInt();
 
             pixels[i0] = col;
             pixels[i1] = col;
             pixels[i2] = col;
             pixels[i3] = col;
         }
-
     }
 
 
