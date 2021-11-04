@@ -15,7 +15,7 @@ public:
     double radius;
     Color color;
     Color emission;
-    double reflectivity = 0;
+    bool reflectivity = false;
     uint32_t *texture = nullptr;
     uint16_t textureWidth;
     uint16_t textureHeight;
@@ -29,7 +29,7 @@ public:
 
     Color emissionF(int x, int y);
 
-    Color BRDF(int x, int y, Color *specular);
+    Color BRDF(Color specular, glm::dvec3 direction, glm::dvec3 normal, glm::dvec3 w);
     Color BRDF(int x, int y);
 };
 

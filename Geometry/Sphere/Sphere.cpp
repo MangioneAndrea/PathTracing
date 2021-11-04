@@ -50,9 +50,15 @@ glm::dvec3 *Sphere::ClosestIntersection(glm::dvec3 origin, glm::dvec3 direction)
     glm::dvec3 res = u * glm::dvec1(best) + (origin);
     return new glm::dvec3{res.x, res.y, res.z};
 }
-Color Sphere::BRDF(int x, int y, Color *specular) {
-    if (specular != nullptr) {
-       return (this->color * (1 - reflectivity) + ((*specular) * reflectivity)) * (1. / M_PI);
+
+#define theta 0.01
+#define micro 20.
+
+Color Sphere::BRDF(Color specular, glm::dvec3 direction, glm::dvec3 normal, glm::dvec3 w) {
+    double nl = glm::length(normal);
+    auto cameraReflection = direction - (glm::dot(direction * glm::dvec3(2, 2, 2), normal)) / (nl * nl) * normal;
+    if (reflectivity && glm::dot(glm::normalize(cameraReflection), w) > (1 - theta)) {
+        return (this->color + (specular * micro)) * (1. / M_PI);
     }
 
     return this->color * (1. / M_PI);

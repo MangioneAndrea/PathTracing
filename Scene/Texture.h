@@ -65,8 +65,9 @@ public:
     void GetPixels() override {
         glm::dvec3 up = glm::vec3(0, 1, 0);
 
-        auto r = glm::normalize(glm::cross(up, lookAt));
-        auto u = glm::normalize(glm::cross(lookAt, r));
+        auto direction = glm::normalize(lookAt - eye);
+        auto r = glm::normalize(glm::cross(up, direction));
+        auto u = glm::normalize(glm::cross(direction, r));
 
         double fovScale = std::tan(fov / 2);
         for (auto i = 0; i < width * height; i++) {
@@ -78,7 +79,7 @@ public:
             y = (y / ((float) height / 2) - 1) * fovScale;
             auto tmp = r * glm::dvec1(fovScale * x);
             auto tmp2 = u * (-fovScale * y);
-            glm::dvec3 d = glm::normalize(lookAt) + tmp + tmp2;//  lookAt.no.plus(&tmp).plus(&tmp2);
+            glm::dvec3 d = direction + tmp + tmp2;//  lookAt.no.plus(&tmp).plus(&tmp2);
 
             pixels[i] = 0;
 

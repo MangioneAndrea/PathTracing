@@ -69,8 +69,8 @@ public:
 
             for (int aa = 0; aa < iterations; aa++) {
 
-                float xShifted =  glm::gaussRand(x,aa_sigma);
-                float yShifted =  glm::gaussRand(y,aa_sigma);
+                float xShifted = glm::gaussRand(x, aa_sigma);
+                float yShifted = glm::gaussRand(y, aa_sigma);
                 //pixel = (vertical + (i / width)) * width + ((horizontal + i) % width);
                 // x,y from -1 to 1
                 xShifted = (xShifted / ((float) width / 2) - 1) * aspectRatio;

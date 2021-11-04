@@ -27,7 +27,7 @@
 #define SCENE1 7
 #define SCENE2 8
 
-#define ACTIVE 6
+#define ACTIVE 4
 
 #if ACTIVE == 6
 #undef WIDTH

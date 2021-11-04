@@ -16,8 +16,8 @@ public:
         this->width = width;
         this->height = height;
         objects = new std::vector<Sphere *>{
-                new Sphere{glm::vec3{-0.6, -0.7, -0.6}, 0.3, 0xDDDD11, 1},
-                new Sphere{glm::vec3{0.3, -0.4, 0.3}, 0.6, 0xDDDDDD, 1},
+                new Sphere{glm::vec3{-0.6, -0.7, -0.6}, 0.3, 0xDDDD11, true},
+                new Sphere{glm::vec3{0.3, -0.4, 0.3}, 0.6, 0xDDDDDD, true},
                 new Sphere{
                         glm::vec3{0, 0, 1001},
                         1000,
@@ -107,9 +107,6 @@ public:
 #define fRand() (((float) ((int) rand())) / (RAND_MAX / 2) - 1)
 #define p 0.1
     Color ComputeColor(glm::dvec3 origin, glm::dvec3 direction, int count) {
-
-        // auto r = Ray(origin, direction);
-
         Sphere *closest = nullptr;
         glm::dvec3 *hp_ = ClosestVectorFrom(origin, direction, closest);
 
@@ -143,17 +140,7 @@ public:
 
         auto nextEmission = ComputeColor(hp, randomDir, count + 1);
 
-        Color *specular = nullptr;
-
-        if (closest->reflectivity > 0) {
-            double nl = glm::length(n);
-            auto r = direction - (glm::dot(direction * glm::dvec3(2, 2, 2), n)) / (nl * nl) * n;
-            Color next = ComputeColor(hp, r, count + 1);
-            specular = &next;
-        }
-
-
-        Color ownColor = closest->BRDF(0, 0, specular) * (glm::dot(n, randomDir) * ((2 * PI) / (1 - p)));
+        Color ownColor = closest->BRDF(nextEmission, direction, n, randomDir) * (glm::dot(n, randomDir) * ((2 * PI) / (1 - p)));
         Color res = closest->emission + nextEmission * ownColor;
         delete hp_;
         return res;
